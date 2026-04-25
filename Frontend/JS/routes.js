@@ -268,21 +268,34 @@ function initRegisterPage() {
 
 function initLoginForm() {
 	const form = document.getElementById("loginForm");
-	if (!form) {
-		return;
-	}
+	if (!form) return;
 
-	form.addEventListener("submit", (event) => {
+	form.addEventListener("submit", async (event) => {
 		event.preventDefault();
 		const formData = new FormData(form);
 		const email = String(formData.get("email") || "").trim().toLowerCase();
-		const sessionUser = {
-			email,
-			loggedInAt: new Date().toISOString()
-		};
+		const password = String(formData.get("password") || "");
 
-		saveSessionUser(sessionUser);
-		window.location.href = "/HTML/company.html";
+		try {
+			const res = await fetch("/api/auth/login", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ email, password })
+			});
+			const data = await res.json();
+			if (!res.ok) {
+				alert(data.detail || "Login failed");
+				return;
+			}
+			localStorage.setItem("CCM_token", data.token);
+
+			const sessionUser = { email, loggedInAt: new Date().toISOString() };
+			saveSessionUser(sessionUser);
+			window.location.href = "/HTML/company.html";
+		} catch (err) {
+			console.error(err);
+			alert("Server error: " + err.message);
+		}
 	});
 }
 
@@ -428,41 +441,69 @@ function initAccountPage() {
 
 function initOrgForm() {
 	const form = document.getElementById("orgCreateForm");
-	if (!form) {
-		return;
-	}
+	if (!form) return;
 
-	form.addEventListener("submit", (event) => {
+	form.addEventListener("submit", async (event) => {
 		event.preventDefault();
 		const formData = new FormData(form);
-		const org = createOrganization({
-			name: String(formData.get("orgName") || ""),
-			adminName: String(formData.get("adminName") || ""),
-			adminEmail: String(formData.get("adminEmail") || ""),
-			adminPassword: String(formData.get("adminPassword") || "")
-		});
+		const name = String(formData.get("orgName") || "").trim();
+		const adminName = String(formData.get("adminName") || "").trim();
+		const adminEmail = String(formData.get("adminEmail") || "").trim().toLowerCase();
+		const adminPassword = String(formData.get("adminPassword") || "");
 
-		window.location.href = `/HTML/org-created.html?org=${encodeURIComponent(org.name)}`;
+		try {
+			const res = await fetch("/api/auth/register/org", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ email: adminEmail, username: adminName, password: adminPassword, company_name: name })
+			});
+			const data = await res.json();
+			if (!res.ok) {
+				alert(data.detail || "Registration failed");
+				return;
+			}
+			localStorage.setItem("CCM_token", data.token);
+
+			const org = createOrganization({ name, adminName, adminEmail, adminPassword });
+			if (org) window.location.href = `/HTML/org-created.html?org=${encodeURIComponent(org.name)}`;
+		} catch (err) {
+			console.error(err);
+			alert("Server error: " + err.message);
+		}
 	});
 }
 
 function initUserForm() {
 	const form = document.getElementById("userJoinForm");
-	if (!form) {
-		return;
-	}
+	if (!form) return;
 
-	form.addEventListener("submit", (event) => {
+	form.addEventListener("submit", async (event) => {
 		event.preventDefault();
 		const formData = new FormData(form);
-		const request = requestOrgAccess({
-			fullName: String(formData.get("userName") || ""),
-			email: String(formData.get("userEmail") || ""),
-			password: String(formData.get("employeePassword") || ""),
-			orgName: String(formData.get("orgSearch") || "")
-		});
+		const fullName = String(formData.get("userName") || "").trim();
+		const email = String(formData.get("userEmail") || "").trim().toLowerCase();
+		const password = String(formData.get("employeePassword") || "");
+		const orgName = String(formData.get("orgSearch") || "").trim();
 
-		window.location.href = `/HTML/user-pending.html?org=${encodeURIComponent(request.orgName)}&status=${request.status}`;
+		try {
+			const res = await fetch("/api/auth/register/user", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ email, username: fullName, password, company_name: orgName })
+			});
+			const data = await res.json();
+			if (!res.ok) {
+				alert(data.detail || "Registration failed");
+				return;
+			}
+			localStorage.setItem("CCM_token", data.token);
+
+			const request = requestOrgAccess({ fullName, email, password, orgName });
+			window.location.href = `/HTML/user-pending.html?org=${encodeURIComponent(request.orgName)}&status=${request.status}`;
+		} catch (err) {
+			console.error(err);
+			alert("Server error: " + err.message);
+		}
 	});
 }
 

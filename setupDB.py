@@ -1,48 +1,11 @@
 from pymongo import MongoClient
-from pymongo.errors import OperationFailure
 import datetime
 import uuid
-import os
-
-
-def load_local_env(env_path=".env"):
-    if not os.path.exists(env_path):
-        return
-
-    with open(env_path, "r", encoding="utf-8") as env_file:
-        for line in env_file:
-            line = line.strip()
-            if not line or line.startswith("#") or "=" not in line:
-                continue
-
-            key, value = line.split("=", 1)
-            key = key.strip()
-            value = value.strip().strip('"').strip("'")
-            if key and key not in os.environ:
-                os.environ[key] = value
-
-
-load_local_env()
 
 class MongoDBManager:
-    def __init__(self, uri=None):
-        uri = uri or os.getenv("MONGODB_URI")
-        if not uri:
-            raise ValueError(
-                "Missing MongoDB URI. Set MONGODB_URI before running setupDB.py."
-            )
-
+    def __init__(self, uri="mongodb://localhost:27017/"):
         self.client = MongoClient(uri)
-        # Fail early with a clear message if Atlas credentials are invalid.
-        try:
-            self.client.admin.command("ping")
-        except OperationFailure as exc:
-            raise RuntimeError(
-                "MongoDB authentication failed. Verify username/password in MONGODB_URI "
-                "and confirm your Atlas DB user permissions."
-            ) from exc
-
-        self.db = self.client['DB']
+        self.db = self.client['PolicyWiseDB']
         
         # Collections
         self.orgs = self.db['organizations']
@@ -74,3 +37,4 @@ class MongoDBManager:
 # Initialize
 db_manager = MongoDBManager()
 print("MongoDB Collections and Indexes Initialized.")
+#xxx

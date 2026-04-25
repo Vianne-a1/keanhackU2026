@@ -651,12 +651,16 @@ function initCompanyPage() {
 		if (!chatLogList) {
 			return;
 		}
-		if (!isAdmin) {
-			chatLogList.innerHTML = `<p class="account-status">Chat logs are visible to admin accounts only.</p>`;
-			return;
-		}
 		const allLogs = getStoredChatLogs();
-		const logs = allLogs.filter(log => log.orgScope === currentCompanyName);
+        const sessionUser = getSessionUser();
+        const currentUserEmail = sessionUser ? sessionUser.email : null;
+
+		let logs = allLogs.filter(log => log.orgScope === currentCompanyName);
+
+        // If not admin, filter to only show their own logs
+        if (!isAdmin && currentUserEmail) {
+            logs = logs.filter(log => log.userEmail === currentUserEmail);
+        }
 
 		if (!logs.length) {
 			chatLogList.innerHTML = `<p class="account-status">No chat logs available yet for ${currentCompanyName || 'this organization'}.</p>`;

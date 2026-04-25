@@ -111,39 +111,6 @@
             </div>
         </section>
 
-        <section id="playground" class="section reveal">
-            <h2>Interactive Playground</h2>
-            <div class="play-grid">
-                <article class="play-card">
-                    <h3>Policy Confusion Agent Demo</h3>
-                    <label for="scenario">Scenario</label>
-                    <select id="scenario">
-                        <option value="software">Buying software</option>
-                        <option value="data">Sharing customer data</option>
-                        <option value="vendor">Working with a new vendor</option>
-                    </select>
-
-                    <label for="amount">Purchase amount (USD)</label>
-                    <input id="amount" type="number" min="0" value="1200">
-
-                    <div class="inline-checks">
-                        <label><input id="approvedVendor" type="checkbox" checked> Approved vendor</label>
-                        <label><input id="securityReview" type="checkbox"> Security review completed</label>
-                    </div>
-
-                    <button id="runPolicy" class="btn btn-primary" type="button">Evaluate Policy</button>
-                    <div id="policyResult" class="result-card" aria-live="polite"></div>
-                </article>
-
-                <article class="play-card">
-                    <h3>Fraud &amp; Fairness Contract Audit</h3>
-                    <label for="contractText">Paste a contract excerpt</label>
-                    <textarea id="contractText" rows="8" placeholder="Example: Auto-renews for 5 years. Additional service fee may apply. Payment account changed from prior invoice..."></textarea>
-                    <button id="runAudit" class="btn btn-secondary" type="button">Run Red-Flag Audit</button>
-                    <div id="auditResult" class="result-card" aria-live="polite"></div>
-                </article>
-            </div>
-        </section>
 
     </main>
 

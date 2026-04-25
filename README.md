@@ -11,7 +11,7 @@ CCM AI is an AI-powered compliance assistant that helps employees check requests
 ## Features
 
 - **Policy Chat** — Ask natural-language questions ("Can I expense this?", "Do I need approval to share this data?") and get a structured verdict with citations from your company's uploaded policies.
-- **Contract Analysis** — Upload a vendor contract (PDF or DOCX) and get an AI risk assessment: fraud signals, unfair clauses, and an overall verdict.
+- **Fraud Detection** — Analyze employee-submitted text or requests to identify fraud signals and compliance violations, with a clear risk verdict.
 - **Multi-tenant** — Each company has its own policies. Employees register under an organization and only see that org's policies.
 - **Role-based access** — Admins upload and manage policies; regular users query them.
 

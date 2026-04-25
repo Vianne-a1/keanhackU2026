@@ -87,8 +87,7 @@ python3 -m uvicorn main:app --reload --port 8000
 
 ```bash
 cd frontend
-npm install
-pip install -r requirements.txt
+python3 -m http.server 3000
 ```
 
 The app runs at `http://localhost:3000`.

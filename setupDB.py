@@ -37,3 +37,4 @@ class MongoDBManager:
 # Initialize
 db_manager = MongoDBManager()
 print("MongoDB Collections and Indexes Initialized.")
+#xxx

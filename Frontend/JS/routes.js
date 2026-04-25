@@ -39,14 +39,21 @@ function saveSessionUser(user) {
 
 function getAccountProfile() {
 	try {
-		return JSON.parse(localStorage.getItem(ROUTE_KEYS.accountProfile) || "null");
+        const session = getSessionUser();
+        if (!session || !session.email) return null;
+		const profiles = JSON.parse(localStorage.getItem(ROUTE_KEYS.accountProfile) || "{}");
+        return profiles[session.email.toLowerCase()] || null;
 	} catch {
 		return null;
 	}
 }
 
 function saveAccountProfile(profile) {
-	localStorage.setItem(ROUTE_KEYS.accountProfile, JSON.stringify(profile));
+    const session = getSessionUser();
+    if (!session || !session.email) return;
+    const profiles = JSON.parse(localStorage.getItem(ROUTE_KEYS.accountProfile) || "{}");
+    profiles[session.email.toLowerCase()] = profile;
+	localStorage.setItem(ROUTE_KEYS.accountProfile, JSON.stringify(profiles));
 	const matchedOrg = findOrg(profile.organization);
 	if (matchedOrg) {
 		localStorage.setItem(ROUTE_KEYS.activeOrg, JSON.stringify(matchedOrg));
@@ -268,38 +275,29 @@ function initRegisterPage() {
 
 function initLoginForm() {
 	const form = document.getElementById("loginForm");
-	if (!form) return;
+	if (!form) {
+		return;
+	}
 
 	form.addEventListener("submit", async (event) => {
 		event.preventDefault();
 		const formData = new FormData(form);
 		const email = String(formData.get("email") || "").trim().toLowerCase();
 		const password = String(formData.get("password") || "");
+		const errorEl = document.getElementById("loginError");
 
 		try {
-			const res = await fetch("/api/auth/login", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ email, password })
-			});
-			const data = await res.json();
-			if (!res.ok) {
-				alert(data.detail || "Login failed");
-				return;
-			}
-			localStorage.setItem("CCM_token", data.token);
-
-			const sessionUser = { email, loggedInAt: new Date().toISOString() };
-			saveSessionUser(sessionUser);
+			const data = await apiLogin(email, password);
+			saveSessionUser({ email, role: data.role, company_id: data.company_id, loggedInAt: new Date().toISOString() });
 			window.location.href = "/HTML/company.html";
 		} catch (err) {
-			console.error(err);
-			alert("Server error: " + err.message);
+			if (errorEl) errorEl.textContent = err.message;
+			else alert(err.message);
 		}
 	});
 }
 
-function initAccountPage() {
+async function initAccountPage() {
 	const accountForm = document.getElementById("accountForm");
 	if (!accountForm) {
 		return;
@@ -309,56 +307,52 @@ function initAccountPage() {
 	const photoInput = document.getElementById("profilePhoto");
 	const photoPreview = document.getElementById("profilePhotoPreview");
 	const accountEmail = document.getElementById("accountEmail");
-	const currentSession = getSessionUser();
-	const savedProfile = getAccountProfile();
-	const orgs = getOrganizations();
-	const defaultOrgOptions = ["Company X", "Company Y", "CCM Demo Org"];
-	const availableOrgs = orgs.length ? orgs.map((org) => org.name) : defaultOrgOptions;
+	const activeOrgLabel = document.getElementById("activeOrgLabel");
+	const fullNameInput = document.getElementById("accountFullName");
+	const titleInput = document.getElementById("accountTitle");
 
-	if (orgSelect) {
-		orgSelect.innerHTML = availableOrgs
-			.map((orgName) => `<option value="${orgName}">${orgName}</option>`)
-			.join("");
+    let profileData = { email: "", role: "", companyName: "" };
+    try {
+        const me = await apiMe();
+        const res = await fetch(`${API_BASE}/company`, { headers: authHeaders() });
+        const company = await res.json();
+        profileData = { email: me.email, role: me.role, companyName: company.name };
+    } catch (err) {
+        console.error("Failed to load backend profile data:", err);
+    }
+
+	if (orgSelect && profileData.companyName) {
+		orgSelect.innerHTML = `<option value="${profileData.companyName}" selected>${profileData.companyName}</option>`;
+        orgSelect.disabled = true; // User belongs to exactly one company
+	}
+
+	if (accountEmail) {
+		accountEmail.textContent = profileData.email;
+	}
+
+	if (activeOrgLabel) {
+		activeOrgLabel.textContent = profileData.companyName;
+	}
+
+    if (titleInput) {
+        titleInput.value = profileData.role === "admin" ? "Admin" : "Employee";
+        titleInput.disabled = true; // Role is managed by backend
+    }
+
+	const savedProfile = getAccountProfile();
+    const profile = savedProfile || { emailAliases: [] };
+
+	if (fullNameInput) {
+		fullNameInput.value = profile.fullName || profileData.email.split("@")[0] || "CCM User";
+	}
+	if (photoPreview && profile.photo) {
+		photoPreview.src = profile.photo;
 	}
 
 	const aliasList = document.getElementById("accountEmailAliases");
 	const aliasInput = document.getElementById("accountEmailAliasInput");
 	const addAliasButton = document.getElementById("addAliasButton");
-	const savedAliases = Array.isArray(savedProfile?.emailAliases) ? savedProfile.emailAliases : [];
 
-	const profile = savedProfile || {
-		fullName: currentSession?.email ? currentSession.email.split("@")[0] : "CCM User",
-		email: currentSession?.email || "user@company.com",
-		organization: availableOrgs[0],
-		title: "Employee",
-		photo: "",
-		emailAliases: []
-	};
-
-	if (accountEmail) {
-		accountEmail.textContent = profile.email;
-	}
-
-	const activeOrgLabel = document.getElementById("activeOrgLabel");
-	if (activeOrgLabel) {
-		activeOrgLabel.textContent = profile.organization;
-	}
-
-	if (orgSelect) {
-		orgSelect.value = profile.organization;
-	}
-
-	const fullNameInput = document.getElementById("accountFullName");
-	const titleInput = document.getElementById("accountTitle");
-	if (fullNameInput) {
-		fullNameInput.value = profile.fullName;
-	}
-	if (titleInput) {
-		titleInput.value = profile.title;
-	}
-	if (photoPreview && profile.photo) {
-		photoPreview.src = profile.photo;
-	}
 
 	function renderAliases() {
 		if (!aliasList) {
@@ -441,68 +435,52 @@ function initAccountPage() {
 
 function initOrgForm() {
 	const form = document.getElementById("orgCreateForm");
-	if (!form) return;
+	if (!form) {
+		return;
+	}
 
 	form.addEventListener("submit", async (event) => {
 		event.preventDefault();
 		const formData = new FormData(form);
-		const name = String(formData.get("orgName") || "").trim();
-		const adminName = String(formData.get("adminName") || "").trim();
-		const adminEmail = String(formData.get("adminEmail") || "").trim().toLowerCase();
-		const adminPassword = String(formData.get("adminPassword") || "");
+		const email = String(formData.get("adminEmail") || "").trim().toLowerCase();
+		const username = String(formData.get("adminName") || "").trim();
+		const password = String(formData.get("adminPassword") || "");
+		const company_name = String(formData.get("orgName") || "").trim();
+		const errorEl = document.getElementById("orgError");
 
 		try {
-			const res = await fetch("/api/auth/register/org", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ email: adminEmail, username: adminName, password: adminPassword, company_name: name })
-			});
-			const data = await res.json();
-			if (!res.ok) {
-				alert(data.detail || "Registration failed");
-				return;
-			}
-			localStorage.setItem("CCM_token", data.token);
-
-			const org = createOrganization({ name, adminName, adminEmail, adminPassword });
-			if (org) window.location.href = `/HTML/org-created.html?org=${encodeURIComponent(org.name)}`;
+			const data = await apiRegisterOrg(email, username, password, company_name);
+			saveSessionUser({ email, role: data.role, company_id: data.company_id, loggedInAt: new Date().toISOString() });
+			window.location.href = `/HTML/org-created.html?org=${encodeURIComponent(company_name)}`;
 		} catch (err) {
-			console.error(err);
-			alert("Server error: " + err.message);
+			if (errorEl) errorEl.textContent = err.message;
+			else alert(err.message);
 		}
 	});
 }
 
 function initUserForm() {
 	const form = document.getElementById("userJoinForm");
-	if (!form) return;
+	if (!form) {
+		return;
+	}
 
 	form.addEventListener("submit", async (event) => {
 		event.preventDefault();
 		const formData = new FormData(form);
-		const fullName = String(formData.get("userName") || "").trim();
+		const username = String(formData.get("userName") || "").trim();
 		const email = String(formData.get("userEmail") || "").trim().toLowerCase();
 		const password = String(formData.get("employeePassword") || "");
-		const orgName = String(formData.get("orgSearch") || "").trim();
+		const company_name = String(formData.get("orgSearch") || "").trim();
+		const errorEl = document.getElementById("userError");
 
 		try {
-			const res = await fetch("/api/auth/register/user", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ email, username: fullName, password, company_name: orgName })
-			});
-			const data = await res.json();
-			if (!res.ok) {
-				alert(data.detail || "Registration failed");
-				return;
-			}
-			localStorage.setItem("CCM_token", data.token);
-
-			const request = requestOrgAccess({ fullName, email, password, orgName });
-			window.location.href = `/HTML/user-pending.html?org=${encodeURIComponent(request.orgName)}&status=${request.status}`;
+			const data = await apiRegisterUser(email, username, password, company_name);
+			saveSessionUser({ email, role: data.role, company_id: data.company_id, loggedInAt: new Date().toISOString() });
+			window.location.href = `/HTML/company.html`;
 		} catch (err) {
-			console.error(err);
-			alert("Server error: " + err.message);
+			if (errorEl) errorEl.textContent = err.message;
+			else alert(err.message);
 		}
 	});
 }
@@ -546,7 +524,6 @@ function initCompanyPage() {
 		return;
 	}
 
-	const orgSelect = document.getElementById("companyOrgSelect");
 	const orgInfo = document.getElementById("companyInfo");
 	const uploadArea = document.getElementById("companyUploadArea");
 	const requestList = document.getElementById("companyRequestList");
@@ -557,113 +534,108 @@ function initCompanyPage() {
 	const documentsList = document.getElementById("companyDocumentsList");
 	const docForm = document.getElementById("companyDocForm");
 	const docFileInput = document.getElementById("companyDocFile");
-	const docNameInput = document.getElementById("companyDocName");
-	const requests = readStore(ROUTE_KEYS.requests);
-	const documents = getStoredDocuments();
-	const orgs = getOrganizations();
-	const activeOrg = JSON.parse(localStorage.getItem(ROUTE_KEYS.activeOrg) || "null");
-	const availableOrgs = orgs.length ? orgs : activeOrg ? [activeOrg] : [];
-	let selectedOrgName = activeOrg?.name || availableOrgs[0]?.name || "";
+	const uploadStatus = document.getElementById("companyUploadStatus");
 
-	function renderOrgOptions() {
-		if (!orgSelect) {
+	const sessionUser = getSessionUser();
+	const isAdmin = sessionUser && (sessionUser.role === "org" || sessionUser.role === "admin");
+    let currentCompanyName = "";
+
+	if (uploadArea) {
+		uploadArea.style.display = isAdmin ? "block" : "none";
+	}
+
+	async function renderCompanyInfo() {
+		if (!orgInfo) {
 			return;
 		}
-
-		orgSelect.innerHTML = availableOrgs
-			.map((org) => `<option value="${org.name}">${org.name}</option>`)
-			.join("");
-		if (selectedOrgName) {
-			orgSelect.value = selectedOrgName;
+		if (!sessionUser) {
+			orgInfo.innerHTML = `<p class="account-status">Please log in to view company info.</p>`;
+			return;
+		}
+		try {
+			const res = await fetch(`${API_BASE}/company`, { headers: authHeaders() });
+			const company = await res.json();
+			if (!res.ok) throw new Error(company.detail || "Failed to load company");
+            currentCompanyName = company.name;
+			orgInfo.innerHTML = `
+				<div class="account-summary">
+					<div><span class="summary-label">Organization</span><strong>${company.name}</strong></div>
+					<div><span class="summary-label">Members</span><strong>${company.member_count}</strong></div>
+					<div><span class="summary-label">Your Role</span><strong>${company.role}</strong></div>
+				</div>
+			`;
+		} catch (err) {
+			orgInfo.innerHTML = `<p class="account-status">Could not load organization info: ${err.message}</p>`;
 		}
 	}
 
-	function renderCompanyInfo() {
-		const org = findOrg(selectedOrgName) || activeOrg || availableOrgs[0] || null;
-		if (!orgInfo || !org) {
-			if (orgInfo) {
-				orgInfo.innerHTML = `<p>No organization available yet. Create one from the registration flow.</p>`;
+	async function renderDocuments() {
+		if (!documentsList) {
+			return;
+		}
+		if (!sessionUser) {
+			documentsList.innerHTML = `<p class="account-status">Please log in to view documents.</p>`;
+			return;
+		}
+		try {
+			const docs = await apiListPolicies();
+			if (!docs.length) {
+				documentsList.innerHTML = isAdmin
+					? `<p class="account-status">No policy documents uploaded yet. Use the upload form above.</p>`
+					: `<p class="account-status">No policy documents available yet.</p>`;
+				return;
 			}
-			return null;
+			documentsList.innerHTML = docs.map((doc) => `
+				<article class="play-card">
+					<span class="tag approved">Policy</span>
+					<h3>${doc.title || doc.filename}</h3>
+					<p>${doc.filename}</p>
+					${isAdmin ? `<button class="btn btn-secondary" type="button" data-delete-doc="${doc._id}" style="margin-top:8px;">Delete</button>` : ""}
+				</article>
+			`).join("");
+		} catch (err) {
+			documentsList.innerHTML = `<p class="account-status">Could not load documents: ${err.message}</p>`;
 		}
-
-		const memberCount = Array.isArray(org.members) ? org.members.length : 0;
-		const adminMode = isOrgAdmin(org);
-		if (uploadArea) {
-			uploadArea.style.display = adminMode ? "block" : "none";
-		}
-		orgInfo.innerHTML = `
-			<div class="account-summary">
-				<div><span class="summary-label">Organization Name</span><strong>${org.name}</strong></div>
-				<div><span class="summary-label">Admin</span><strong>${org.adminName}</strong></div>
-				<div><span class="summary-label">Admin Email</span><strong>${org.adminEmail}</strong></div>
-				<div><span class="summary-label">Created</span><strong>${new Date(org.createdAt).toLocaleString()}</strong></div>
-				<div><span class="summary-label">Member Count</span><strong>${memberCount}</strong></div>
-			</div>
-		`;
-		return org;
 	}
 
 	function renderRequests() {
 		if (!requestList) {
 			return;
 		}
-
-		const currentOrg = findOrg(selectedOrgName) || activeOrg || availableOrgs[0] || null;
-		const currentRequests = requests.filter((request) => request.orgName.toLowerCase() === currentOrg?.name?.toLowerCase() && request.status === "pending");
-
-		if (!currentRequests.length) {
-			requestList.innerHTML = `<p class="account-status">No pending requests for this organization.</p>`;
+		const allRequests = readStore(ROUTE_KEYS.requests) || [];
+		const requests = allRequests.filter(r => r.orgName === currentCompanyName);
+		const pendingRequests = requests.filter((r) => r.status === "pending");
+		if (!pendingRequests.length) {
+			requestList.innerHTML = `<p class="account-status">No pending requests.</p>`;
 			return;
 		}
-
-		requestList.innerHTML = currentRequests
-			.map((request) => {
-				const labelClass = request.status === "approved" ? "approved" : request.status === "denied" ? "prohibited" : "warning";
-				const actionButtons = request.status === "pending"
-					? `
-						<button class="btn btn-primary" type="button" data-approve-request="${request.id}">Approve</button>
-						<button class="btn btn-secondary" type="button" data-deny-request="${request.id}">Deny</button>
-					`
-					: `<p class="account-status">Already ${request.status}.</p>`;
-
-				return `
-					<article class="play-card">
-						<span class="tag ${labelClass}">${request.status}</span>
-						<h3>${request.fullName}</h3>
-						<p><strong>Email:</strong> ${request.email}</p>
-						<p><strong>Organization:</strong> ${request.orgName}</p>
-						<div class="hero-cta">${actionButtons}</div>
-					</article>
-				`;
-			})
-			.join("");
+		requestList.innerHTML = pendingRequests.map((request) => `
+			<article class="play-card">
+				<span class="tag warning">${request.status}</span>
+				<h3>${request.fullName}</h3>
+				<p><strong>Email:</strong> ${request.email}</p>
+				<p><strong>Organization:</strong> ${request.orgName}</p>
+				<div class="hero-cta">
+					<button class="btn btn-primary" type="button" data-approve-request="${request.id}">Approve</button>
+					<button class="btn btn-secondary" type="button" data-deny-request="${request.id}">Deny</button>
+				</div>
+			</article>
+		`).join("");
 	}
 
 	function renderHistory() {
-		const currentOrg = findOrg(selectedOrgName) || activeOrg || availableOrgs[0] || null;
-		const currentApproved = requests.filter((request) => request.orgName.toLowerCase() === currentOrg?.name?.toLowerCase() && request.status === "approved");
-		const currentDenied = requests.filter((request) => request.orgName.toLowerCase() === currentOrg?.name?.toLowerCase() && request.status === "denied");
-
+		const allRequests = readStore(ROUTE_KEYS.requests) || [];
+		const requests = allRequests.filter(r => r.orgName === currentCompanyName);
+		const approved = requests.filter((r) => r.status === "approved");
+		const denied = requests.filter((r) => r.status === "denied");
 		if (approvedList) {
-			approvedList.innerHTML = currentApproved.length
-				? currentApproved.map((request) => `
-					<div>
-						<span class="summary-label">${request.fullName}</span>
-						<strong>${request.email}</strong>
-					</div>
-				`).join("")
+			approvedList.innerHTML = approved.length
+				? approved.map((r) => `<div><span class="summary-label">${r.fullName}</span><strong>${r.email}</strong></div>`).join("")
 				: `<p class="account-status">No approved users yet.</p>`;
 		}
-
 		if (deniedList) {
-			deniedList.innerHTML = currentDenied.length
-				? currentDenied.map((request) => `
-					<div>
-						<span class="summary-label">${request.fullName}</span>
-						<strong>${request.email}</strong>
-					</div>
-				`).join("")
+			deniedList.innerHTML = denied.length
+				? denied.map((r) => `<div><span class="summary-label">${r.fullName}</span><strong>${r.email}</strong></div>`).join("")
 				: `<p class="account-status">No denied users yet.</p>`;
 		}
 	}
@@ -672,43 +644,24 @@ function initCompanyPage() {
 		if (!membersList) {
 			return;
 		}
-
-		const currentOrg = findOrg(selectedOrgName) || activeOrg || availableOrgs[0] || null;
-		const members = Array.isArray(currentOrg?.members) ? currentOrg.members : [];
-
-		if (!members.length) {
-			membersList.innerHTML = `<p class="account-status">No members have been approved yet.</p>`;
-			return;
-		}
-
-		membersList.innerHTML = members
-			.map((member) => `
-				<div class="account-summary">
-					<div><span class="summary-label">Name</span><strong>${member.fullName}</strong></div>
-					<div><span class="summary-label">Email</span><strong>${member.email}</strong></div>
-					<div><span class="summary-label">Role</span><strong>${member.role || "User"}</strong></div>
-				</div>
-			`)
-			.join("");
+		membersList.innerHTML = `<p class="account-status">Member management coming soon.</p>`;
 	}
 
 	function renderChatLogs() {
 		if (!chatLogList) {
 			return;
 		}
-
-		const currentOrg = findOrg(selectedOrgName) || activeOrg || availableOrgs[0] || null;
-		if (!isOrgAdmin(currentOrg)) {
+		if (!isAdmin) {
 			chatLogList.innerHTML = `<p class="account-status">Chat logs are visible to admin accounts only.</p>`;
 			return;
 		}
+		const allLogs = getStoredChatLogs();
+		const logs = allLogs.filter(log => log.orgScope === currentCompanyName);
 
-		const logs = getStoredChatLogs().filter((log) => log.orgScope.toLowerCase() === currentOrg?.name?.toLowerCase());
 		if (!logs.length) {
-			chatLogList.innerHTML = `<p class="account-status">No chat logs available yet.</p>`;
+			chatLogList.innerHTML = `<p class="account-status">No chat logs available yet for ${currentCompanyName || 'this organization'}.</p>`;
 			return;
 		}
-
 		chatLogList.innerHTML = logs.map((log) => `
 			<article class="play-card">
 				<span class="tag ${log.verdict === "Approved" ? "approved" : log.verdict === "Prohibited" ? "prohibited" : "warning"}">${log.verdict}</span>
@@ -719,107 +672,62 @@ function initCompanyPage() {
 		`).join("");
 	}
 
-	function renderDocuments() {
-		if (!documentsList) {
-			return;
-		}
-
-		const currentOrg = findOrg(selectedOrgName) || activeOrg || availableOrgs[0] || null;
-		const currentDocuments = documents.filter((doc) => doc.orgName.toLowerCase() === currentOrg?.name?.toLowerCase());
-		const adminMode = isOrgAdmin(currentOrg);
-
-		if (!currentDocuments.length) {
-			documentsList.innerHTML = adminMode
-				? `<p class="account-status">No documents uploaded yet. Use the upload form to add required documents.</p>`
-				: `<p class="account-status">No required documents available yet.</p>`;
-			return;
-		}
-
-		documentsList.innerHTML = currentDocuments.map((doc) => {
-			const docActions = adminMode
-				? `<button class="btn btn-secondary" type="button" data-remove-doc="${doc.id}">Remove</button>`
-				: `<a class="btn btn-secondary" href="${doc.downloadUrl || '#'}" download="${doc.fileName}">Download</a>`;
-
-			return `
-				<article class="play-card">
-					<span class="tag approved">Required Doc</span>
-					<h3>${doc.fileName}</h3>
-					<p>${doc.summary || "Company document"}</p>
-					<div class="hero-cta">${docActions}</div>
-				</article>
-			`;
-		}).join("");
-	}
-
-	function refresh() {
-		renderOrgOptions();
-		renderCompanyInfo();
-		renderDocuments();
+	async function refresh() {
+		await renderCompanyInfo();
+		await renderDocuments();
 		renderRequests();
 		renderHistory();
 		renderMembers();
 		renderChatLogs();
 	}
 
-	if (orgSelect) {
-		orgSelect.addEventListener("change", () => {
-			selectedOrgName = orgSelect.value;
-			refresh();
-		});
-	}
-
-	page.addEventListener("click", (event) => {
+	page.addEventListener("click", async (event) => {
 		const approveButton = event.target.closest("[data-approve-request]");
 		const denyButton = event.target.closest("[data-deny-request]");
-		const removeButton = event.target.closest("[data-remove-doc]");
+		const deleteDocButton = event.target.closest("[data-delete-doc]");
 
 		if (approveButton) {
 			approveRequestById(approveButton.getAttribute("data-approve-request"));
-			refresh();
+			renderRequests();
+			renderHistory();
 		}
-
 		if (denyButton) {
 			denyRequestById(denyButton.getAttribute("data-deny-request"));
-			refresh();
+			renderRequests();
+			renderHistory();
 		}
-
-		if (removeButton) {
-			const docId = removeButton.getAttribute("data-remove-doc");
-			const nextDocuments = documents.filter((doc) => doc.id !== docId);
-			saveStoredDocuments(nextDocuments);
-			refresh();
+		if (deleteDocButton) {
+			const docId = deleteDocButton.getAttribute("data-delete-doc");
+			deleteDocButton.disabled = true;
+			deleteDocButton.textContent = "Deleting…";
+			try {
+				await apiDeletePolicy(docId);
+				await renderDocuments();
+			} catch (err) {
+				deleteDocButton.disabled = false;
+				deleteDocButton.textContent = "Delete";
+				alert(`Delete failed: ${err.message}`);
+			}
 		}
 	});
 
-	if (docForm && docFileInput && docNameInput) {
-		docForm.addEventListener("submit", (event) => {
+	if (docForm && docFileInput) {
+		docForm.addEventListener("submit", async (event) => {
 			event.preventDefault();
-			const currentOrg = findOrg(selectedOrgName) || activeOrg || availableOrgs[0] || null;
 			const file = docFileInput.files && docFileInput.files[0];
-			const displayName = String(docNameInput.value || file?.name || "Required Document").trim();
-			if (!file || !currentOrg || !isOrgAdmin(currentOrg)) {
+			if (!file) {
 				return;
 			}
-
-			const reader = new FileReader();
-			reader.onload = () => {
-				const nextDocuments = [
-					...documents,
-					{
-						id: `doc_${Date.now()}`,
-						orgName: currentOrg.name,
-						fileName: displayName,
-						summary: "Uploaded company document",
-						content: String(reader.result || ""),
-						downloadUrl: String(reader.result || ""),
-						uploadedAt: new Date().toISOString()
-					}
-				];
-				saveStoredDocuments(nextDocuments);
+			if (uploadStatus) uploadStatus.textContent = "Uploading…";
+			try {
+				const result = await apiUploadPolicy(file);
+				if (uploadStatus) uploadStatus.textContent = result.message || "Uploaded successfully.";
 				docForm.reset();
-				refresh();
-			};
-			reader.readAsDataURL(file);
+				await renderDocuments();
+			} catch (err) {
+				if (uploadStatus) uploadStatus.style.color = "#f87171";
+				if (uploadStatus) uploadStatus.textContent = `Error: ${err.message}`;
+			}
 		});
 	}
 

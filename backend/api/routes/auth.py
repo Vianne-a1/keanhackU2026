@@ -43,13 +43,12 @@ def register_org(req: OrgRegisterRequest):
 
     user_id = str(db_users.insert_one({
         "email": req.email,
-        "username": req.username,
         "password": hash_password(req.password),
-        "role": "org",
+        "role": "admin",
         "company_id": company_id,
     }).inserted_id)
 
-    token = create_token(user_id, req.email, "org", company_id)
+    token = create_token(user_id, req.email, "admin", company_id)
     return {"token": token, "role": "org", "company_id": company_id}
 
 
@@ -69,7 +68,6 @@ def register_user(req: UserRegisterRequest):
 
     user_id = str(db_users.insert_one({
         "email": req.email,
-        "username": req.username,
         "password": hash_password(req.password),
         "role": "employee",
         "company_id": company_id,
@@ -107,3 +105,12 @@ def login(req: LoginRequest):
 
     token = create_token(user_id, req.email, role, company_id)
     return {"token": token, "role": role, "company_id": company_id}
+
+
+@router.get("/auth/me")
+def get_me(user: dict = Depends(get_current_user)):
+    return {
+        "email": user["email"],
+        "role": user["role"],
+        "company_id": user["company_id"]
+    }

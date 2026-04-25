@@ -8,7 +8,7 @@ from core.config import JWT_SECRET
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 bearer = HTTPBearer()
 
-ROLES_WITH_UPLOAD = {"org", "admin"}
+ROLES_WITH_UPLOAD = {"admin"}
 
 
 def hash_password(password: str) -> str:

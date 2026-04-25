@@ -178,47 +178,51 @@ function runPolicyCheck() {
     `;
 }
 
-async function runContractAudit() {
-    const text = document.getElementById("contractText").value;
+function runContractAudit() {
+    const text = document.getElementById("contractText").value.toLowerCase();
     const output = document.getElementById("auditResult");
-    output.innerHTML = "<p>Running analysis...</p>";
 
-    try {
-        const formData = new FormData();
-        const blob = new Blob([text], { type: "text/plain" });
-        formData.append("file", blob, "contract.txt");
+    const checks = [
+        {
+            label: "Automatic long-term renewal",
+            regex: /(auto[- ]?renew|automatic renewal|5 years|five years)/
+        },
+        {
+            label: "Potential hidden service fee",
+            regex: /(service fee|processing fee|administrative fee|additional fee)/
+        },
+        {
+            label: "Unusual payment/bank account change",
+            regex: /(bank account change|wire to new account|updated payment destination)/
+        },
+        {
+            label: "Ghost service risk",
+            regex: /(advisory retainer|miscellaneous support|undefined service)/
+        }
+    ];
 
-        const token = localStorage.getItem("CCM_token");
-        const headers = {};
-        if (token) headers["Authorization"] = `Bearer ${token}`;
+    const findings = checks.filter((item) => item.regex.test(text)).map((item) => item.label);
 
-        const res = await fetch("/api/upload-contract", {
-            method: "POST",
-            headers,
-            body: formData
-        });
+    let verdict = "Safe";
+    let cssClass = "safe";
 
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.detail || "Upload failed");
-
-        let cssClass = "safe";
-        if (data.verdict === "Red Flag" || data.verdict === "Prohibited") cssClass = "red-flag";
-        else if (data.verdict === "Warning" || data.verdict === "Flagged") cssClass = "warning";
-
-        const reasoningHtml = data.reasoning ? `<p>${data.reasoning}</p>` : "";
-        const citationsHtml = data.citations && data.citations.length > 0 
-            ? `<ul>${data.citations.map(c => `<li>${c}</li>`).join("")}</ul>` 
-            : "";
-
-        output.innerHTML = `
-            <span class="tag ${cssClass}">${data.verdict}</span>
-            <strong>${data.verdict} Audit Result</strong>
-            ${reasoningHtml}
-            ${citationsHtml}
-        `;
-    } catch (err) {
-        output.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
+    if (findings.length >= 3) {
+        verdict = "Red Flag";
+        cssClass = "red-flag";
+    } else if (findings.length >= 1) {
+        verdict = "Warning";
+        cssClass = "warning";
     }
+
+    const list = findings.length
+        ? `<ul>${findings.map((item) => `<li>${item}</li>`).join("")}</ul>`
+        : "<p>No major fraud/fairness indicators were detected in this sample.</p>";
+
+    output.innerHTML = `
+        <span class="tag ${cssClass}">${verdict}</span>
+        <strong>${verdict} Audit Result</strong>
+        ${list}
+    `;
 }
 
 function evaluatePolicyQuestion(question, orgScope) {
@@ -296,62 +300,70 @@ function initPolicyChatPage() {
         return;
     }
 
+    const orgScopeSelect = document.getElementById("orgScope");
+    if (orgScopeSelect && getToken()) {
+        fetch(`${API_BASE}/company`, { headers: authHeaders() })
+            .then((r) => r.json())
+            .then((company) => {
+                if (company.name) {
+                    orgScopeSelect.innerHTML = `<option>${company.name}</option>`;
+                }
+            })
+            .catch(() => {});
+    }
+
     form.addEventListener("submit", async (event) => {
         event.preventDefault();
 
         const questionInput = document.getElementById("question");
         const orgScopeInput = document.getElementById("orgScope");
         const question = String(questionInput?.value || "").trim();
-        const orgScope = String(orgScopeInput?.value || "Company X");
+        const orgScope = String(orgScopeInput?.value || "Your Organization");
 
-        if (!question) return;
+        if (!question) {
+            return;
+        }
 
         workspace.classList.add("chat-mode");
         appendPolicyBubble(thread, "user", "You", question, [orgScope]);
 
-        appendPolicyBubble(thread, "assistant", "CCM Assistant", "Thinking...");
+        const thinkingId = `thinking-${Date.now()}`;
+        const thinkingBubble = document.createElement("div");
+        thinkingBubble.className = "chat-bubble assistant";
+        thinkingBubble.id = thinkingId;
+        thinkingBubble.innerHTML = `<div class="bubble-label">CCM Assistant</div><div class="bubble-content">Analyzing policies…</div>`;
+        thread.appendChild(thinkingBubble);
+        thread.scrollTop = thread.scrollHeight;
+        questionInput.value = "";
 
         try {
-            const token = localStorage.getItem("CCM_token");
-            const headers = { "Content-Type": "application/json" };
-            if (token) headers["Authorization"] = `Bearer ${token}`;
+            const data = await apiChat(question);
+            const verdictLabel = {
+                approved: "Approved",
+                needs_approval: "Needs Approval",
+                prohibited: "Prohibited",
+                red_flag: "Red Flag"
+            }[data.verdict] || data.verdict;
 
-            const res = await fetch("/api/chat", {
-                method: "POST",
-                headers,
-                body: JSON.stringify({ query: question })
-            });
+            const citationsHtml = data.citations?.length
+                ? `<ul>${data.citations.map(c => `<li>${c}</li>`).join("")}</ul>`
+                : "";
 
-            const data = await res.json();
-            // remove "Thinking..." bubble
-            thread.removeChild(thread.lastChild);
-
-            if (!res.ok) throw new Error(data.detail || "Chat failed");
-
-            const verdict = data.verdict || "Approved";
-            const reasoning = data.reasoning || data.response || "No response";
-
-            appendPolicyBubble(
-                thread,
-                "assistant",
-                "CCM Assistant",
-                `<strong>${verdict} Verdict</strong><p>${reasoning}</p>`,
-                [verdict, orgScope]
-            );
+            thinkingBubble.querySelector(".bubble-content").innerHTML =
+                `<strong>${verdictLabel}</strong><p>${data.reasoning}</p>${citationsHtml}`;
 
             savePolicyChatLog({
                 question,
                 orgScope,
-                verdict,
-                response: reasoning,
+                verdict: verdictLabel,
+                response: data.reasoning,
+                userEmail: typeof getSessionUser === "function" ? getSessionUser()?.email : null,
                 createdAt: new Date().toISOString()
             });
         } catch (err) {
-            thread.removeChild(thread.lastChild);
-            appendPolicyBubble(thread, "assistant", "CCM Assistant", `<p style="color:red;">Error: ${err.message}</p>`);
+            thinkingBubble.querySelector(".bubble-content").innerHTML =
+                `<span style="color:#f87171">Error: ${err.message}</span>`;
         }
-
-        questionInput.value = "";
     });
 }
 

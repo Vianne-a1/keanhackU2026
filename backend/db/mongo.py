@@ -38,3 +38,7 @@ def policy_documents():
 
 def policy_chunks():
     return get_db()["policy_chunks"]
+
+
+def audit_logs():
+    return get_db()["audit_logs"]

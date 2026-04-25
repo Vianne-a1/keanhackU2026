@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PolicyGuard Agent — System Architecture</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Inter, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(59, 130, 246, 0.25), transparent 35%),
+        radial-gradient(circle at top right, rgba(168, 85, 247, 0.22), transparent 35%),
+        #020617;
+      color: #e5e7eb;
+      line-height: 1.6;
+      padding: 40px;
+    }
+
+    .page {
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .hero {
+      padding: 56px;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      border-radius: 32px;
+      background: rgba(15, 23, 42, 0.82);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+      margin-bottom: 36px;
+    }
+
+    h1 {
+      font-size: 52px;
+      line-height: 1.05;
+      margin-bottom: 18px;
+      background: linear-gradient(90deg, #60a5fa, #a78bfa, #34d399);
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    .subtitle {
+      font-size: 20px;
+      color: #cbd5e1;
+      max-width: 850px;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .chip {
+      padding: 9px 14px;
+      border-radius: 999px;
+      background: rgba(30, 41, 59, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      color: #bfdbfe;
+      font-size: 14px;
+    }
+
+    section {
+      margin-bottom: 36px;
+      padding: 32px;
+      border-radius: 28px;
+      background: rgba(15, 23, 42, 0.72);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+    }
+
+    h2 {
+      font-size: 28px;
+      margin-bottom: 20px;
+      color: #f8fafc;
+    }
+
+    h3 {
+      font-size: 18px;
+      margin-bottom: 10px;
+      color: #93c5fd;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+    }
+
+    .card {
+      padding: 22px;
+      border-radius: 22px;
+      background: rgba(30, 41, 59, 0.86);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.25);
+    }
+
+    .card p, li {
+      color: #cbd5e1;
+      font-size: 15px;
+    }
+
+    ul {
+      padding-left: 18px;
+      margin-top: 8px;
+    }
+
+    .architecture {
+      display: grid;
+      grid-template-columns: 1fr 80px 1fr 80px 1fr;
+      align-items: stretch;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .layer {
+      padding: 24px;
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95));
+      border: 1px solid rgba(148, 163, 184, 0.22);
+    }
+
+    .arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #60a5fa;
+      font-size: 38px;
+      font-weight: bold;
+    }
+
+    .mini {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(2, 6, 23, 0.42);
+      border: 1px solid rgba(148, 163, 184, 0.12);
+      color: #cbd5e1;
+      font-size: 14px;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .step {
+      position: relative;
+      padding: 18px;
+      border-radius: 20px;
+      background: rgba(30, 41, 59, 0.9);
+      border: 1px solid rgba(96, 165, 250, 0.25);
+    }
+
+    .num {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .agent-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+    }
+
+    .agent {
+      padding: 22px;
+      border-radius: 24px;
+      background: rgba(30, 41, 59, 0.88);
+      border: 1px solid rgba(52, 211, 153, 0.25);
+    }
+
+    .tag {
+      display: inline-block;
+      margin-bottom: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(16, 185, 129, 0.14);
+      color: #6ee7b7;
+      font-size: 13px;
+    }
+
+    .database {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .table-card {
+      padding: 18px;
+      border-radius: 18px;
+      background: rgba(2, 6, 23, 0.45);
+      border: 1px solid rgba(148, 163, 184, 0.16);
+    }
+
+    .table-card strong {
+      color: #f8fafc;
+    }
+
+    .risk {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .red {
+      border-color: rgba(248, 113, 113, 0.45);
+    }
+
+    .yellow {
+      border-color: rgba(250, 204, 21, 0.45);
+    }
+
+    .green {
+      border-color: rgba(74, 222, 128, 0.45);
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      color: #94a3b8;
+      font-size: 14px;
+    }
+
+    @media (max-width: 900px) {
+      body {
+        padding: 18px;
+      }
+
+      h1 {
+        font-size: 38px;
+      }
+
+      .grid,
+      .grid-2,
+      .flow,
+      .agent-grid,
+      .database,
+      .risk,
+      .architecture {
+        grid-template-columns: 1fr;
+      }
+
+      .arrow {
+        transform: rotate(90deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+
+    <div class="hero">
+      <h1>PolicyGuard Agent — System Architecture</h1>
+      <p class="subtitle">
+        AI-powered policy assistant that helps employees understand company rules before purchases,
+        data sharing, vendor work, and contract signing — with bonus fraud and fairness detection.
+      </p>
+
+      <div class="chips">
+        <div class="chip">React + Vite</div>
+        <div class="chip">FastAPI</div>
+        <div class="chip">MongoDB Atlas</div>
+        <div class="chip">Vector Search</div>
+        <div class="chip">LLM Agent</div>
+        <div class="chip">Hackathon Sprint</div>
+      </div>
+    </div>
+
+    <section>
+      <h2>01 — Problem</h2>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Policy Confusion</h3>
+          <p>
+            Employees often do not know which company policies apply before they buy software,
+            share customer data, travel, or work with vendors. The policies exist, but they are long,
+            scattered, and difficult to interpret.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>Vendor Contract Risk</h3>
+          <p>
+            Vendor contracts may include hidden fees, unfair renewal clauses, unusual payment terms,
+            or suspicious bank account changes. These risks are easy to miss during fast internal approvals.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>02 — Full System Architecture</h2>
+      <p>
+        Three-tier web app: React frontend, FastAPI backend with an embedded agent orchestrator,
+        and MongoDB Atlas for document storage plus vector search.
+      </p>
+
+      <div class="architecture">
+        <div class="layer">
+          <h3>Browser — React + Vite</h3>
+          <div class="mini">Employee chat interface</div>
+          <div class="mini">Vendor contract upload</div>
+          <div class="mini">Admin policy upload portal</div>
+          <div class="mini">Verdict dashboard</div>
+          <div class="mini">Policy citations + red flags</div>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="layer">
+          <h3>Backend — FastAPI</h3>
+          <div class="mini">POST /chat</div>
+          <div class="mini">POST /upload-policy</div>
+          <div class="mini">POST /upload-contract</div>
+          <div class="mini">Agent orchestrator</div>
+          <div class="mini">Company scoping + access control</div>
+        </div>
+
+        <div class="arrow">→</div>
+
+        <div class="layer">
+          <h3>AI + Data Layer</h3>
+          <div class="mini">MongoDB Atlas</div>
+          <div class="mini">Atlas Vector Search</div>
+          <div class="mini">Embedding model</div>
+          <div class="mini">LLM reasoning agent</div>
+          <div class="mini">Fraud / fairness audit</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>03 — Management Flow: Company Side</h2>
+
+      <div class="flow">
+        <div class="step">
+          <div class="num">1</div>
+          <h3>Document Upload</h3>
+          <p>Admins upload company policy documents such as procurement, IT security, travel, and data sharing policies.</p>
+        </div>
+
+        <div class="step">
+          <div class="num">2</div>
+          <h3>Text Extraction</h3>
+          <p>The backend extracts clean text from PDF or DOCX files using document parsers.</p>
+        </div>
+
+        <div class="step">
+          <div class="num">3</div>
+          <h3>Chunking</h3>
+          <p>Long policy documents are split into smaller searchable sections.</p>
+        </div>
+
+        <div class="step">
+          <div class="num">4</div>
+          <h3>Vectorization</h3>
+          <p>Each chunk is converted into embeddings so the system can search by meaning, not just keywords.</p>
+        </div>
+
+        <div class="step">
+          <div class="num">5</div>
+          <h3>Scoped Storage</h3>
+          <p>Chunks and vectors are stored with company IDs so one company can never access another company’s data.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>04 — Assistant Flow: User Side</h2>
+
+      <div class="flow">
+        <div class="step">
+          <div class="num">1</div>
+          <h3>Ask Question</h3>
+          <p>Employee asks: “Can I buy this software with my company card?”</p>
+        </div>
+
+        <div class="step">
+          <div class="num">2</div>
+          <h3>Intent Detection</h3>
+          <p>The agent identifies whether this is about procurement, IT approval, vendor risk, or data sharing.</p>
+        </div>
+
+        <div class="step">
+          <div class="num">3</div>
+          <h3>Semantic Search</h3>
+          <p>Relevant policy sections are retrieved from that company’s private vector database.</p>
+        </div>
+
+        <div class="step">
+          <div class="num">4</div>
+          <h3>Policy Reasoning</h3>
+          <p>The agent compares rules across multiple policies before making a decision.</p>
+        </div>
+
+        <div class="step">
+          <div class="num">5</div>
+          <h3>Final Verdict</h3>
+          <p>The user receives Approved, Needs Approval, Prohibited, or Red Flag with plain-English reasoning.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>05 — Agent Pipeline Detail</h2>
+
+      <div class="agent-grid">
+        <div class="agent">
+          <span class="tag">Agent 1</span>
+          <h3>Policy Retriever</h3>
+          <p>
+            Searches company-specific policy chunks using semantic search. Returns the most relevant sections
+            with source titles and citations.
+          </p>
+        </div>
+
+        <div class="agent">
+          <span class="tag">Agent 2</span>
+          <h3>Policy Reasoning Agent</h3>
+          <p>
+            Checks multiple policies together. Example: software purchase may require procurement approval,
+            IT security approval, and vendor review.
+          </p>
+        </div>
+
+        <div class="agent">
+          <span class="tag">Agent 3</span>
+          <h3>Fraud Detection Agent</h3>
+          <p>
+            Scans uploaded vendor contracts for ghost services, unusual payment terms, bank account changes,
+            and mismatch from standard templates.
+          </p>
+        </div>
+
+        <div class="agent">
+          <span class="tag">Agent 4</span>
+          <h3>Fairness Audit Agent</h3>
+          <p>
+            Detects predatory clauses such as automatic long-term renewal, no opt-out window,
+            hidden fees, or one-sided termination terms.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>06 — Verdict System</h2>
+
+      <div class="risk">
+        <div class="card green">
+          <h3>Approved</h3>
+          <p>
+            The action follows policy requirements. The user can proceed without additional approval.
+          </p>
+        </div>
+
+        <div class="card yellow">
+          <h3>Needs Approval</h3>
+          <p>
+            The action may be allowed, but requires manager, legal, procurement, or IT security approval.
+          </p>
+        </div>
+
+        <div class="card red">
+          <h3>Prohibited / Red Flag</h3>
+          <p>
+            The action violates company policy or the contract contains suspicious or unfair terms.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>07 — Data Model</h2>
+      <p>
+        MongoDB Atlas stores company documents, policy chunks, chat history, contract audits, and human feedback.
+      </p>
+
+      <div class="database">
+        <div class="table-card">
+          <strong>companies</strong>
+          <p>company_id, name, domain, settings</p>
+        </div>
+
+        <div class="table-card">
+          <strong>users</strong>
+          <p>user_id, company_id, role, department</p>
+        </div>
+
+        <div class="table-card">
+          <strong>policy_documents</strong>
+          <p>doc_id, company_id, title, file_type, raw_text</p>
+        </div>
+
+        <div class="table-card">
+          <strong>policy_chunks</strong>
+          <p>chunk_id, company_id, doc_id, text, embedding</p>
+        </div>
+
+        <div class="table-card">
+          <strong>contract_audits</strong>
+          <p>audit_id, company_id, contract_text, red_flags</p>
+        </div>
+
+        <div class="table-card">
+          <strong>chat_history</strong>
+          <p>message_id, user_id, query, verdict, citations</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>08 — Example User Journey</h2>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>Employee Question</h3>
+          <p>
+            “Can I buy this $2,000 AI software subscription with my company card?”
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>Agent Answer</h3>
+          <p>
+            <strong>Verdict: Needs Approval.</strong><br />
+            This purchase exceeds the procurement threshold and involves a new software vendor.
+            You need manager approval and IT security review before purchasing.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>09 — Tech Stack</h2>
+
+      <div class="grid">
+        <div class="card">
+          <h3>Frontend</h3>
+          <ul>
+            <li>React + Vite</li>
+            <li>TailwindCSS</li>
+            <li>Chat UI</li>
+            <li>Upload dashboard</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3>Backend</h3>
+          <ul>
+            <li>FastAPI</li>
+            <li>Python</li>
+            <li>PDF / DOCX parsing</li>
+            <li>REST API</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3>Database + AI</h3>
+          <ul>
+            <li>MongoDB Atlas</li>
+            <li>Atlas Vector Search</li>
+            <li>Embeddings</li>
+            <li>LLM Agent</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>10 — Sprint Scope</h2>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>Build During Hackathon</h3>
+          <ul>
+            <li>Policy upload portal</li>
+            <li>Employee chat interface</li>
+            <li>MongoDB connection</li>
+            <li>Policy chunking + vector search</li>
+            <li>Policy reasoning agent</li>
+            <li>Contract red-flag detector</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3>Post-Hackathon</h3>
+          <ul>
+            <li>Role-based access control</li>
+            <li>Slack / email alerts</li>
+            <li>More fraud templates</li>
+            <li>Human feedback loop</li>
+            <li>Audit history export</li>
+            <li>Company-specific fine-tuning</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer">
+      PolicyGuard Agent · Company Policy Assistant · Fraud & Fairness Detection · Built with React + FastAPI + MongoDB Atlas
+    </div>
+
+  </div>
+</body>
+</html>

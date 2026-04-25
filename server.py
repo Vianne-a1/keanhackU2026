@@ -54,6 +54,6 @@ async def catch_all(request: Request, full_path: str):
     return FileResponse(os.path.join(frontend_dir, "HTML", "home.html"))
 
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", "8080"))
+    port = int(os.getenv("PORT", "8000"))
     print(f"Starting PolicyGuard FastAPI Server on port {port}...")
     uvicorn.run(app, host="0.0.0.0", port=port)

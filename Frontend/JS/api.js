@@ -56,6 +56,15 @@ async function apiRegisterUser(email, username, password, company_name) {
     return data;
 }
 
+async function apiMe() {
+    const res = await fetch(`${API_BASE}/auth/me`, {
+        headers: authHeaders(),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Failed to load profile");
+    return data;
+}
+
 // ── Policy chat ───────────────────────────────────────────────────────────────
 
 async function apiChat(query) {

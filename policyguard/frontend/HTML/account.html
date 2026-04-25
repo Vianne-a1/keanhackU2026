@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCM | Account</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../CSS/style.css">
+</head>
+<body>
+    <div class="page-bg" aria-hidden="true"></div>
+
+    <header class="site-header">
+        <a class="brand" href="/HTML/home.html">
+            <span class="brand-badge">CCM</span>
+            <span>CCM</span>
+        </a>
+        <nav class="site-nav">
+            <a href="/HTML/home.html">Home</a>
+            <a href="/HTML/policy.html">Policy Agent</a>
+            <a href="/HTML/fraudness.html">Fraud Audit</a>
+            <a href="/HTML/company.html">Company</a>
+            <a href="/HTML/register.html">Register</a>
+            <a href="/HTML/login.html">Login</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero reveal visible" style="max-width: 1100px; margin: 8vh auto 0;">
+            <p class="eyebrow">Account Center</p>
+            <h1>Manage your CCM profile and organization.</h1>
+            <p class="hero-text">Update your display information, change your profile photo, and switch the active organization linked to your account.</p>
+
+            <div class="account-grid">
+                <article class="play-card account-card">
+                    <div class="profile-visual">
+                        <img id="profilePhotoPreview" alt="Profile preview" class="profile-photo" src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'%3E%3Crect width='240' height='240' rx='120' fill='%233b8f87'/%3E%3Ctext x='50%25' y='54%25' text-anchor='middle' font-family='Arial' font-size='72' fill='white'%3ECCM%3C/text%3E%3C/svg%3E">
+                    </div>
+
+                    <p class="account-meta">Signed in as <strong id="accountEmail">user@company.com</strong></p>
+
+                    <form id="accountForm">
+                        <label for="accountFullName">Display Name</label>
+                        <input id="accountFullName" name="accountFullName" type="text" placeholder="Your name">
+
+                        <label for="accountTitle">Role / Title</label>
+                        <input id="accountTitle" name="accountTitle" type="text" placeholder="Employee, Admin, Manager">
+
+                        <label for="accountOrgSelect">Organization</label>
+                        <select id="accountOrgSelect" name="accountOrgSelect"></select>
+
+                        <label for="profilePhoto">Profile Photo</label>
+                        <input id="profilePhoto" name="profilePhoto" type="file" accept="image/*">
+
+                        <button class="btn btn-primary" type="submit">Save Account</button>
+                        <p id="accountSaveStatus" class="account-status" aria-live="polite"></p>
+                    </form>
+
+                    <div class="chat-intro">
+                        <p class="chat-intro-title">Email Management</p>
+                        <p>Add extra email addresses you can log in under.</p>
+                        <label for="accountEmailAliasInput">Add login email</label>
+                        <input id="accountEmailAliasInput" type="email" placeholder="alias@company.com">
+                        <button class="btn btn-secondary" type="button" id="addAliasButton">Add Email</button>
+                        <div id="accountEmailAliases" class="account-summary" style="margin-top: 14px;"></div>
+                    </div>
+                </article>
+
+                <article class="play-card">
+                    <h3>Account Snapshot</h3>
+                    <div class="account-summary">
+                        <div>
+                            <span class="summary-label">Account Type</span>
+                            <strong>Profile & Access</strong>
+                        </div>
+                        <div>
+                            <span class="summary-label">Current Workspace</span>
+                            <strong id="activeOrgLabel">Select an organization</strong>
+                        </div>
+                        <div>
+                            <span class="summary-label">Login State</span>
+                            <strong>Authenticated</strong>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-top: 22px;">Quick Actions</h3>
+                    <div class="hero-cta">
+                        <a class="btn btn-secondary" href="/HTML/policy.html">Open Policy Agent</a>
+                        <a class="btn btn-secondary" href="/HTML/fraudness.html">Open Fraud Audit</a>
+                        <a class="btn btn-secondary" href="/HTML/company.html">Open Company Page</a>
+                        <button class="btn btn-primary" type="button" id="logoutButton">Log Out</button>
+                    </div>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>CCM • Compliance Clarity + Contract Risk Defense</p>
+    </footer>
+
+    <script src="../JS/routes.js"></script>
+    <script src="../JS/app.js"></script>
+</body>
+</html>

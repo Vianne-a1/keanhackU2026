@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCM | Policy Agent</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../CSS/style.css">
+</head>
+<body>
+    <div class="page-bg" aria-hidden="true"></div>
+
+    <header class="site-header">
+        <a class="brand" href="/HTML/home.html">
+            <span class="brand-badge">CCM</span>
+            <span>CCM</span>
+        </a>
+        <nav class="site-nav">
+            <a href="/HTML/home.html">Home</a>
+            <a href="/HTML/fraudness.html">Fraud Audit</a>
+            <a href="/HTML/login.html">Login</a>
+            <a href="/HTML/register.html">Register</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero reveal visible">
+            <p class="eyebrow">Feature 1</p>
+            <h1>Policy Confusion Agent</h1>
+            <p class="hero-text">Ask a policy question in plain language. The assistant retrieves relevant internal policies, applies organization-specific rules, and returns an explanation with an action verdict.</p>
+        </section>
+
+        <section class="section reveal visible">
+            <h2>Ask the Agent</h2>
+            <div class="play-grid policy-grid" id="policyWorkspace">
+                <article class="play-card policy-panel">
+                    <form id="policyForm">
+                        <label for="question">Employee Question</label>
+                        <textarea id="question" rows="5" placeholder="Can I purchase a new AI tool for the marketing team if it costs $1,200 and the vendor is not on the approved list?"></textarea>
+
+                        <label for="orgScope">Organization Scope</label>
+                        <select id="orgScope">
+                            <option>Your Organization</option>
+                        </select>
+
+                        <button class="btn btn-primary" type="submit">Submit Query</button>
+                    </form>
+
+                    <div class="chat-intro">
+                        <p class="chat-intro-title">CCM Chat Mode</p>
+                        <p>After you submit, the page switches to a conversation view with your question and CCM's response.</p>
+                    </div>
+
+                    <div class="chat-thread" id="policyChatThread" aria-live="polite" aria-label="Policy chat conversation">
+                        <div class="chat-bubble assistant">
+                            <div class="bubble-label">CCM Assistant</div>
+                            <div>Ask a policy question and I’ll check the relevant internal rules for you.</div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="play-card policy-notes">
+                    <h3>Reasoning Path (Simplified)</h3>
+                    <ol>
+                        <li>Retrieve semantically relevant procurement clauses.</li>
+                        <li>Retrieve IT/security vendor approval requirements.</li>
+                        <li>Cross-check amount and vendor status against policy constraints.</li>
+                        <li>Return verdict: Approved, Flagged, or Prohibited.</li>
+                    </ol>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>CCM • Compliance Clarity + Contract Risk Defense</p>
+    </footer>
+
+    <script src="../JS/api.js"></script>
+    <script src="../JS/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCM | Register</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../CSS/style.css">
+</head>
+<body>
+    <div class="page-bg" aria-hidden="true"></div>
+
+    <header class="site-header">
+        <a class="brand" href="/HTML/home.html">
+            <span class="brand-badge">CCM</span>
+            <span>CCM</span>
+        </a>
+        <nav class="site-nav">
+            <a href="/HTML/home.html">Home</a>
+            <a href="/HTML/login.html">Login</a>
+            <a href="/HTML/policy.html">Policy Agent</a>
+            <a href="/HTML/fraudness.html">Fraud Audit</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero reveal visible" style="max-width: 920px; margin: 8vh auto 0;">
+            <p class="eyebrow">Registration Flow</p>
+            <h1>Choose whether you are creating an organization or joining one.</h1>
+            <p class="hero-text">
+                Organization accounts create a workspace and approval authority. User accounts search for a company and wait for that organization to verify the request.
+            </p>
+
+            <div class="play-grid">
+                <article class="play-card">
+                    <h3>Create an Organization</h3>
+                    <p>Use this path if you are setting up a new company workspace.</p>
+                    <ul>
+                        <li>Become the first admin for the organization.</li>
+                        <li>Upload policy documents and manage access.</li>
+                        <li>Approve future user requests for your workspace.</li>
+                    </ul>
+                    <button class="btn btn-primary" type="button" data-register-org>I am creating an org</button>
+                </article>
+
+                <article class="play-card">
+                    <h3>Join an Organization</h3>
+                    <p>Use this path if your company already exists and you need access.</p>
+                    <ul>
+                        <li>Search or type your organization name.</li>
+                        <li>Submit your work email and full name.</li>
+                        <li>Wait for org approval before login is enabled.</li>
+                    </ul>
+                    <button class="btn btn-secondary" type="button" data-register-user>I am joining an org</button>
+                </article>
+            </div>
+
+            <p class="hero-text" style="margin-top: 16px;">
+                Already have access? <a href="/HTML/login.html">Log in here</a>
+            </p>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>CCM • Compliance Clarity + Contract Risk Defense</p>
+    </footer>
+
+    <script src="../JS/routes.js"></script>
+    <script src="../JS/app.js"></script>
+</body>
+</html>

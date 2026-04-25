@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+httpx
+pymongo[srv]
+python-multipart
+pypdf
+python-docx
+pyjwt
+passlib[bcrypt]
+bcrypt==4.0.1

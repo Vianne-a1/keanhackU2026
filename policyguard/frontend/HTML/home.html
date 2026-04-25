@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCM | Policy Confusion Agent</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../CSS/style.css">
+</head>
+<body>
+    <div class="page-bg" aria-hidden="true"></div>
+
+    <header class="site-header">
+        <a class="brand" href="#top">
+            <span class="brand-badge">CCM</span>
+            <span>CCM</span>
+        </a>
+        <nav class="site-nav">
+            <a href="#features">Features</a>
+            <a href="#flow">Flow</a>
+            <a href="#playground">Playground</a>
+        </nav>
+    </header>
+
+    <main id="top">
+        <section class="hero reveal">
+            <p class="eyebrow">KeanHackU 2026</p>
+            <h1>AI policy guardrails before risky company decisions happen.</h1>
+            <p class="hero-text">
+                CCM helps employees interpret internal rules before they buy software,
+                share data, or sign vendor contracts. It combines policy reasoning with fraud
+                and fairness auditing in one workflow.
+            </p>
+            <div class="hero-cta">
+                <a class="btn btn-primary" href="#playground">Try Demo Logic</a>
+                <a class="btn btn-secondary" href="#usage">Usage Guide</a>
+            </div>
+            <div class="meta-grid">
+                <article>
+                    <h3>Team Members</h3>
+                    <p>Tiffany Yang, Xinying Cai, Yue Yao</p>
+                </article>
+                <article>
+                    <h3>Built With</h3>
+                    <p>HTML, CSS, JavaScript, Python, MongoDB Atlas, Vector Search</p>
+                </article>
+                <article>
+                    <h3>Project Link</h3>
+                    <p><a href="#" aria-label="Project link placeholder">Add your deployed URL here</a></p>
+                </article>
+                <article>
+                    <h3>APIs / AIs Used</h3>
+                    <p>LLM reasoning, semantic search embeddings, MongoDB Atlas API stack</p>
+                </article>
+            </div>
+        </section>
+
+        <section id="features" class="section reveal">
+            <h2>Core Features</h2>
+            <div class="feature-grid">
+                <article class="feature-card">
+                    <p class="pill">Feature 1</p>
+                    <h3>Policy Confusion Agent</h3>
+                    <p>
+                        Uses multi-policy reasoning instead of basic FAQ lookup.
+                        Example: software purchase requests are checked against procurement budget limits
+                        and IT security approved vendors before returning a verdict.
+                    </p>
+                    <ul>
+                        <li>Semantic retrieval from company-specific policy docs</li>
+                        <li>Chain-of-thought style internal reasoning steps</li>
+                        <li>Outputs: Approved, Flagged, or Prohibited</li>
+                    </ul>
+                </article>
+                <article class="feature-card">
+                    <p class="pill">Feature 2</p>
+                    <h3>Fraud &amp; Fairness Detection</h3>
+                    <p>
+                        Audits uploaded vendor contracts for suspicious terms and unfair clauses.
+                    </p>
+                    <ul>
+                        <li>Fraud red flags: ghost services, unusual payments, bank account changes</li>
+                        <li>Fairness checks: predatory renewals, hidden fees, quote mismatches</li>
+                        <li>Outputs: Safe, Warning, or Red Flag</li>
+                    </ul>
+                </article>
+            </div>
+        </section>
+
+        <section id="flow" class="section reveal">
+            <h2>System Flow</h2>
+            <div class="flow-grid">
+                <article class="flow-card">
+                    <h3>A. Management Flow (Company Side)</h3>
+                    <ol>
+                        <li><strong>Document Ingestion:</strong> Admins upload policies through a secure portal.</li>
+                        <li><strong>Vectorization Engine:</strong> Documents are chunked and embedded for meaning-based retrieval.</li>
+                        <li><strong>Organization Scoping:</strong> Strict isolation keeps Company X data inaccessible to Company Y.</li>
+                    </ol>
+                </article>
+                <article class="flow-card">
+                    <h3>B. Assistant Flow (User Side)</h3>
+                    <ol>
+                        <li><strong>Natural Language Query:</strong> Employees describe purchasing, data, or vendor scenarios.</li>
+                        <li><strong>Semantic Search:</strong> Relevant policy passages are fetched for that employee organization.</li>
+                        <li><strong>Policy Agent Verdict:</strong> Approved, Flagged, or Prohibited with plain-English explanation.</li>
+                    </ol>
+                </article>
+            </div>
+        </section>
+
+        <section id="playground" class="section reveal">
+            <h2>Interactive Playground</h2>
+            <div class="play-grid">
+                <article class="play-card">
+                    <h3>Policy Confusion Agent Demo</h3>
+                    <label for="scenario">Scenario</label>
+                    <select id="scenario">
+                        <option value="software">Buying software</option>
+                        <option value="data">Sharing customer data</option>
+                        <option value="vendor">Working with a new vendor</option>
+                    </select>
+
+                    <label for="amount">Purchase amount (USD)</label>
+                    <input id="amount" type="number" min="0" value="1200">
+
+                    <div class="inline-checks">
+                        <label><input id="approvedVendor" type="checkbox" checked> Approved vendor</label>
+                        <label><input id="securityReview" type="checkbox"> Security review completed</label>
+                    </div>
+
+                    <button id="runPolicy" class="btn btn-primary" type="button">Evaluate Policy</button>
+                    <div id="policyResult" class="result-card" aria-live="polite"></div>
+                </article>
+
+                <article class="play-card">
+                    <h3>Fraud &amp; Fairness Contract Audit</h3>
+                    <label for="contractText">Paste a contract excerpt</label>
+                    <textarea id="contractText" rows="8" placeholder="Example: Auto-renews for 5 years. Additional service fee may apply. Payment account changed from prior invoice..."></textarea>
+                    <button id="runAudit" class="btn btn-secondary" type="button">Run Red-Flag Audit</button>
+                    <div id="auditResult" class="result-card" aria-live="polite"></div>
+                </article>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="site-footer">
+        <p>CCM • Compliance Clarity + Contract Risk Defense</p>
+    </footer>
+
+    <script src="../JS/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCM | Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../CSS/style.css">
+</head>
+<body>
+    <div class="page-bg" aria-hidden="true"></div>
+
+    <header class="site-header">
+        <a class="brand" href="/HTML/home.html">
+            <span class="brand-badge">CCM</span>
+            <span>CCM</span>
+        </a>
+        <nav class="site-nav">
+            <a href="/HTML/home.html">Home</a>
+            <a href="/HTML/register.html">Register</a>
+            <a href="/HTML/account.html">Account</a>
+            <a href="/HTML/policy.html">Policy Agent</a>
+            <a href="/HTML/fraudness.html">Fraud Audit</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero reveal visible" style="max-width: 680px; margin: 10vh auto 0;">
+            <p class="eyebrow">Secure Access</p>
+            <h1>Sign in to your organization workspace.</h1>
+            <p class="hero-text">Admins can ingest policies. Users can ask policy questions and run contract audits.</p>
+
+            <form class="play-card" id="loginForm">
+                <label for="email">Corporate Email</label>
+                <input id="email" name="email" type="email" placeholder="you@company.com" required>
+
+                <label for="password">Password</label>
+                <input id="password" name="password" type="password" placeholder="Enter your password" required>
+
+                <div class="inline-checks">
+                    <label><input type="checkbox" name="remember"> Keep me signed in</label>
+                </div>
+
+                <button class="btn btn-primary" type="submit">Log In</button>
+            </form>
+
+            <p class="hero-text" style="margin-top: 16px;">
+                No account yet? <a href="/HTML/register.html">Create one</a>
+            </p>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>CCM • Compliance Clarity + Contract Risk Defense</p>
+    </footer>
+
+    <script src="../JS/routes.js"></script>
+    <script src="../JS/app.js"></script>
+</body>
+</html>

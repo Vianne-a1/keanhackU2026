@@ -4,7 +4,7 @@ CCM AI is an AI-powered compliance assistant that helps employees check requests
 
 **Team Members:** Tiffany Yang, Xinying Cai, Yue Yao
 
-**Built with:** FastAPI, React, OpenRouter (LLM), MongoDB
+**Built with:** FastAPI, React, OpenRouter (LLM), MongoDB, Gemini, Claude, and GPT
 
 **APIs/AIs used:** OpenRouter API — `nvidia/nemotron-3-super-120b-a12b:free` (default)
 
@@ -12,7 +12,7 @@ CCM AI is an AI-powered compliance assistant that helps employees check requests
 
 - **Policy Chat** — Ask natural-language questions ("Can I expense this?", "Do I need approval to share this data?") and get a structured verdict with citations from your company's uploaded policies.
 - **Contract Analysis** — Upload a vendor contract (PDF or DOCX) and get an AI risk assessment: fraud signals, unfair clauses, and an overall verdict.
-- **Multi-tenant** — Each company has its own policy store. Employees register under an organization and only see that org's policies.
+- **Multi-tenant** — Each company has its own policies. Employees register under an organization and only see that org's policies.
 - **Role-based access** — Admins upload and manage policies; regular users query them.
 
 ## Architecture
@@ -78,20 +78,20 @@ pip install -r requirements.txt
 cp .env.example .env
 # Edit .env with your keys (see Environment Variables below)
 
-uvicorn main:app --reload
+python3 -m uvicorn main:app --reload --port 8000
 ```
 
-The API runs at `http://localhost:8000`. Swagger docs at `http://localhost:8000/docs`.
+
 
 ### Frontend
 
 ```bash
 cd frontend
 npm install
-npm run dev
+pip install -r requirements.txt
 ```
 
-The app runs at `http://localhost:5173`.
+The app runs at `http://localhost:3000`.
 
 ### Environment Variables
 

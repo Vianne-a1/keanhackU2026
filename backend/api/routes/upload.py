@@ -1,4 +1,5 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
+from pydantic import BaseModel
 from core.pipeline_state import PipelineState
 from agents.contract_analysis import ContractAnalysisAgent
 from services.document_parser import parse_document
@@ -6,6 +7,30 @@ from services.document_parser import parse_document
 router = APIRouter()
 
 agent = ContractAnalysisAgent()
+
+
+class ContractTextRequest(BaseModel):
+    text: str
+
+
+@router.post("/analyze-contract-text")
+async def analyze_contract_text(body: ContractTextRequest):
+    contract_text = body.text.strip()
+    if not contract_text:
+        raise HTTPException(status_code=400, detail="No text provided.")
+
+    state = PipelineState(query=contract_text, company_id="default")
+    try:
+        state = await agent.run(state)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    return {
+        "verdict": state.verdict,
+        "reasoning": state.reasoning,
+        "citations": state.citations,
+        "confidence": state.confidence,
+    }
 
 
 @router.post("/upload-contract")

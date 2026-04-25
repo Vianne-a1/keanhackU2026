@@ -125,6 +125,32 @@ async function apiDenyUser(userId) {
     return data;
 }
 
+// ── Contract analysis ─────────────────────────────────────────────────────────
+
+async function apiUploadContract(file) {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch(`${API_BASE}/upload-contract`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: formData,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Analysis failed");
+    return data; // { verdict, reasoning, citations, confidence }
+}
+
+async function apiAnalyzeContractText(text) {
+    const res = await fetch(`${API_BASE}/analyze-contract-text`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...authHeaders() },
+        body: JSON.stringify({ text }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Analysis failed");
+    return data; // { verdict, reasoning, citations, confidence }
+}
+
 // ── Delete policy ─────────────────────────────────────────────────────────────
 
 async function apiDeletePolicy(docId) {

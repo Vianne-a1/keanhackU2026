@@ -186,51 +186,55 @@ function runPolicyCheck() {
     `;
 }
 
-function runContractAudit() {
-    const text = document.getElementById("contractText").value.toLowerCase();
+async function runContractAudit() {
+    const fileInput = document.getElementById("contractFile");
+    const textInput = document.getElementById("contractText");
     const output = document.getElementById("auditResult");
+    const button = document.getElementById("runAudit");
 
-    const checks = [
-        {
-            label: "Automatic long-term renewal",
-            regex: /(auto[- ]?renew|automatic renewal|5 years|five years)/
-        },
-        {
-            label: "Potential hidden service fee",
-            regex: /(service fee|processing fee|administrative fee|additional fee)/
-        },
-        {
-            label: "Unusual payment/bank account change",
-            regex: /(bank account change|wire to new account|updated payment destination)/
-        },
-        {
-            label: "Ghost service risk",
-            regex: /(advisory retainer|miscellaneous support|undefined service)/
-        }
-    ];
+    const file = fileInput && fileInput.files[0];
+    const text = textInput && textInput.value.trim();
 
-    const findings = checks.filter((item) => item.regex.test(text)).map((item) => item.label);
-
-    let verdict = "Safe";
-    let cssClass = "safe";
-
-    if (findings.length >= 3) {
-        verdict = "Red Flag";
-        cssClass = "red-flag";
-    } else if (findings.length >= 1) {
-        verdict = "Warning";
-        cssClass = "warning";
+    if (!file && !text) {
+        output.style.display = "block";
+        output.innerHTML = `<p style="color:#f87171">Please upload a file or paste contract text.</p>`;
+        return;
     }
 
-    const list = findings.length
-        ? `<ul>${findings.map((item) => `<li>${item}</li>`).join("")}</ul>`
-        : "<p>No major fraud/fairness indicators were detected in this sample.</p>";
+    button.disabled = true;
+    button.textContent = "Analyzing…";
+    output.style.display = "none";
 
-    output.innerHTML = `
-        <span class="tag ${cssClass}">${verdict}</span>
-        <strong>${verdict} Audit Result</strong>
-        ${list}
-    `;
+    try {
+        const data = file
+            ? await apiUploadContract(file)
+            : await apiAnalyzeContractText(text);
+
+        const verdictMap = {
+            approved:       { label: "Safe",      css: "safe" },
+            needs_approval: { label: "Warning",   css: "warning" },
+            red_flag:       { label: "Red Flag",  css: "red-flag" },
+        };
+        const { label, css } = verdictMap[data.verdict] || { label: data.verdict, css: "warning" };
+
+        const citationsList = data.citations && data.citations.length
+            ? `<ul>${data.citations.map((c) => `<li>${c}</li>`).join("")}</ul>`
+            : "";
+
+        output.style.display = "block";
+        output.innerHTML = `
+            <span class="tag ${css}">${label}</span>
+            <strong>${label} Audit Result</strong>
+            <p>${data.reasoning}</p>
+            ${citationsList}
+        `;
+    } catch (err) {
+        output.style.display = "block";
+        output.innerHTML = `<p style="color:#f87171">Error: ${err.message}</p>`;
+    } finally {
+        button.disabled = false;
+        button.textContent = "Analyze Contract";
+    }
 }
 
 function evaluatePolicyQuestion(question, orgScope) {

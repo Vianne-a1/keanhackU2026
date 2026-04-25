@@ -36,19 +36,15 @@
             <h2>Red-Flag Audit</h2>
             <div class="play-grid">
                 <article class="play-card">
-                    <label for="contract">Contract Excerpt</label>
-                    <textarea id="contract" rows="9" placeholder="Paste vendor agreement text here..."></textarea>
-                    <button class="btn btn-secondary" type="button">Analyze Contract</button>
+                    <label for="contractFile">Upload Contract (PDF or DOCX)</label>
+                    <input id="contractFile" type="file" accept=".pdf,.docx" style="margin-bottom:0.75rem;">
 
-                    <div class="result-card">
-                        <span class="tag red-flag">Red Flag</span>
-                        <strong>Sample Audit Result</strong>
-                        <ul>
-                            <li>Automatic 5-year renewal without opt-out clause.</li>
-                            <li>New payment destination differs from previous invoices.</li>
-                            <li>Additional service fees not present in original quote.</li>
-                        </ul>
-                    </div>
+                    <label for="contractText">Or paste contract text</label>
+                    <textarea id="contractText" rows="7" placeholder="Paste vendor agreement text here..."></textarea>
+
+                    <button id="runAudit" class="btn btn-secondary" type="button">Analyze Contract</button>
+
+                    <div id="auditResult" class="result-card" style="display:none;"></div>
                 </article>
 
                 <article class="play-card">

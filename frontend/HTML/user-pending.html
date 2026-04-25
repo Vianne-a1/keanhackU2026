@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCM | Access Pending</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../CSS/style.css">
+</head>
+<body>
+    <div class="page-bg" aria-hidden="true"></div>
+
+    <header class="site-header">
+        <a class="brand" href="/HTML/home.html">
+            <span class="brand-badge">CCM</span>
+            <span>CCM</span>
+        </a>
+        <nav class="site-nav">
+            <a href="/HTML/home.html">Home</a>
+            <a href="/HTML/login.html">Login</a>
+            <a href="/HTML/register.html">Register</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero reveal visible" style="max-width: 760px; margin: 10vh auto 0;">
+            <p class="eyebrow">Verification Required</p>
+            <h1>Your user request has been submitted.</h1>
+            <p class="hero-text">The selected organization must verify and accept your access request before this account can be used.</p>
+
+            <div class="play-card">
+                <span class="tag warning" data-pending-status>Pending</span>
+                <p><strong>Organization:</strong> <span data-pending-org>your organization</span></p>
+                <p><strong>Organization Review:</strong> Waiting for admin approval.</p>
+                <p><strong>Status:</strong> Access is not active yet.</p>
+            </div>
+
+            <p class="hero-text" style="margin-top: 16px;">If you are an organization admin, approve requests from your workspace dashboard after login.</p>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>CCM • Compliance Clarity + Contract Risk Defense</p>
+    </footer>
+
+    <script src="../JS/api.js"></script>
+    <script src="../JS/routes.js"></script>
+    <script src="../JS/app.js"></script>
+</body>
+</html>

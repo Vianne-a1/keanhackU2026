@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCM | Company Management</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../CSS/style.css">
+</head>
+<body>
+    <div class="page-bg" aria-hidden="true"></div>
+
+    <header class="site-header">
+        <a class="brand" href="/HTML/home.html">
+            <span class="brand-badge">CCM</span>
+            <span>CCM</span>
+        </a>
+        <nav class="site-nav">
+            <a href="/HTML/home.html">Home</a>
+            <a href="/HTML/account.html">Account</a>
+            <a href="/HTML/policy.html">Policy Agent</a>
+            <a href="/HTML/fraudness.html">Fraud Audit</a>
+        </nav>
+    </header>
+
+    <main id="companyPage">
+        <section class="hero reveal visible" style="max-width: 1180px; margin: 8vh auto 0;">
+            <p class="eyebrow">Company Management</p>
+            <h1>View company info and approve or deny users.</h1>
+            <p class="hero-text">Select an organization, review its profile, and manage user requests and members from one dashboard.</p>
+
+            <div class="play-grid" style="margin-bottom: 16px;">
+                <article class="play-card">
+                    <label for="companyOrgSelect">Choose Organization</label>
+                    <select id="companyOrgSelect"></select>
+                    <div id="companyInfo" class="account-summary" style="margin-top: 16px;"></div>
+
+                    <div id="companyUploadArea" class="chat-intro" style="margin-top: 16px;">
+                        <p class="chat-intro-title">Document Management</p>
+                        <form id="companyDocForm">
+                            <label for="companyDocName">Document Name</label>
+                            <input id="companyDocName" type="text" placeholder="Company Policy">
+
+                            <label for="companyDocFile">Upload Required Document</label>
+                            <input id="companyDocFile" type="file" accept=".pdf,.docx">
+
+                            <p id="companyUploadStatus" style="color:#a3e635;margin-top:8px;"></p>
+                            <button class="btn btn-primary" type="submit">Upload Document</button>
+                        </form>
+                    </div>
+                </article>
+
+                <article class="play-card">
+                    <h3>Company Members</h3>
+                    <div id="companyMembersList" class="account-summary"></div>
+                </article>
+            </div>
+
+            <section class="section reveal visible">
+                <h2>Required Documents</h2>
+                <div id="companyDocumentsList" class="play-grid"></div>
+            </section>
+
+            <section class="section reveal visible">
+                <h2>Pending Requests</h2>
+                <div id="companyRequestList" class="play-grid"></div>
+            </section>
+
+            <section class="section reveal visible">
+                <h2>Approval History</h2>
+                <div class="play-grid">
+                    <article class="play-card">
+                        <h3>Approved Users</h3>
+                        <div id="companyApprovedList" class="account-summary"></div>
+                    </article>
+
+                    <article class="play-card">
+                        <h3>Denied Users</h3>
+                        <div id="companyDeniedList" class="account-summary"></div>
+                    </article>
+                </div>
+            </section>
+
+            <section class="section reveal visible">
+                <h2>Chat Logs</h2>
+                <div id="companyChatLogList" class="play-grid"></div>
+            </section>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>CCM • Compliance Clarity + Contract Risk Defense</p>
+    </footer>
+
+    <script src="../JS/api.js"></script>
+    <script src="../JS/routes.js"></script>
+    <script src="../JS/app.js"></script>
+</body>
+</html>

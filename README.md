@@ -108,7 +108,7 @@ JWT_SECRET=your-random-secret-string
 |----------|-------------|
 | `OPENROUTER_API_KEY` | API key from [openrouter.ai](https://openrouter.ai) |
 | `LLM_MODEL` | Any OpenRouter model ID. Defaults to a free Nemotron model. |
-| `MONGO_URI` | MongoDB connection string |
+| `MONGO_URI` | [MongoDB](https://www.mongodb.com/) connection string | 
 | `JWT_SECRET` | Secret for signing JWT tokens — use a long random string in production |
 
 ## API Endpoints

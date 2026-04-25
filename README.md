@@ -1,6 +1,6 @@
-# PolicyGuard
+# CCM AI
 
-PolicyGuard is an AI-powered compliance assistant that helps employees check requests against company policies and flags risky vendor contracts before signing.
+CCM AI is an AI-powered compliance assistant that helps employees check requests against company policies and flags risky vendor contracts before signing.
 
 **Team Members:** Tiffany Yang, Xinying Cai, Yue Yao
 

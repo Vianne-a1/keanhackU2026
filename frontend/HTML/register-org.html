@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCM | Create Organization</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../CSS/style.css">
+</head>
+<body>
+    <div class="page-bg" aria-hidden="true"></div>
+
+    <header class="site-header">
+        <a class="brand" href="/HTML/home.html">
+            <span class="brand-badge">CCM</span>
+            <span>CCM</span>
+        </a>
+        <nav class="site-nav">
+            <a href="/HTML/register.html">Back to Register</a>
+            <a href="/HTML/login.html">Login</a>
+            <a href="/HTML/policy.html">Policy Agent</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero reveal visible" style="max-width: 760px; margin: 8vh auto 0;">
+            <p class="eyebrow">Organization Setup</p>
+            <h1>Create your organization workspace.</h1>
+            <p class="hero-text">This account becomes the first admin and approval owner for policy documents and member access.</p>
+
+            <form class="play-card" id="orgCreateForm">
+                <label for="orgName">Organization Name</label>
+                <input id="orgName" name="orgName" type="text" placeholder="Company Inc." required>
+
+                <label for="adminName">Admin Full Name</label>
+                <input id="adminName" name="adminName" type="text" placeholder="Your name" required>
+
+                <label for="adminEmail">Corporate Email</label>
+                <input id="adminEmail" name="adminEmail" type="email" placeholder="admin@company.com" required>
+
+                <label for="adminPassword">Password</label>
+                <input id="adminPassword" name="adminPassword" type="password" placeholder="Create a password" required>
+
+                <button class="btn btn-primary" type="submit">Create Organization</button>
+            </form>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>CCM • Compliance Clarity + Contract Risk Defense</p>
+    </footer>
+
+    <script src="../JS/api.js"></script>
+    <script src="../JS/routes.js"></script>
+    <script src="../JS/app.js"></script>
+</body>
+</html>

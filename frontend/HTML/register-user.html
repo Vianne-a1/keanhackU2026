@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCM | Join Organization</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../CSS/style.css">
+</head>
+<body>
+    <div class="page-bg" aria-hidden="true"></div>
+
+    <header class="site-header">
+        <a class="brand" href="/HTML/home.html">
+            <span class="brand-badge">CCM</span>
+            <span>CCM</span>
+        </a>
+        <nav class="site-nav">
+            <a href="/HTML/register.html">Back to Register</a>
+            <a href="/HTML/login.html">Login</a>
+            <a href="/HTML/policy.html">Policy Agent</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero reveal visible" style="max-width: 900px; margin: 8vh auto 0;">
+            <p class="eyebrow">User Enrollment</p>
+            <h1>Search for your organization and request access.</h1>
+            <p class="hero-text">Employees join by typing or selecting the organization name. The org admin must verify and accept the request before the account becomes active.</p>
+
+            <div class="play-grid">
+                <article class="play-card">
+                    <form id="userJoinForm">
+                        <label for="userName">Full Name</label>
+                        <input id="userName" name="userName" type="text" placeholder="Your name" required>
+
+                        <label for="userEmail">Corporate Email</label>
+                        <input id="userEmail" name="userEmail" type="email" placeholder="you@company.com" required>
+
+                        <label for="orgSearch">Search or Type Organization</label>
+                        <input id="orgSearch" name="orgSearch" type="text" list="orgList" placeholder="Start typing your company name" required>
+                        <datalist id="orgList">
+                            <option value="Company X"></option>
+                            <option value="Company Y"></option>
+                            <option value="CCM Demo Org"></option>
+                        </datalist>
+
+                        <label for="employeePassword">Password</label>
+                        <input id="employeePassword" name="employeePassword" type="password" placeholder="Create a password" required>
+
+                        <button class="btn btn-secondary" type="submit">Request Access</button>
+                    </form>
+                </article>
+
+                <article class="play-card">
+                    <h3>What happens next?</h3>
+                    <ol>
+                        <li>Your request is attached to the organization you selected.</li>
+                        <li>The organization admin receives a verification request.</li>
+                        <li>Once approved, you can log in and use the policy tools.</li>
+                    </ol>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>CCM • Compliance Clarity + Contract Risk Defense</p>
+    </footer>
+
+    <script src="../JS/api.js"></script>
+    <script src="../JS/routes.js"></script>
+    <script src="../JS/app.js"></script>
+</body>
+</html>

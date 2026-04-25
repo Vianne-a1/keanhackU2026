@@ -105,13 +105,25 @@ def run_contract_audit(contract_text: str):
 
     if score < 30:
         risk_level = "low"
+        verdict = "Safe"
+        summary = "No major red flags were detected."
+        recommendation = "This contract appears generally safe, but review before signing."
     elif score < 60:
         risk_level = "medium"
+        verdict = "Needs Approval"
+        summary = "Some suspicious or unfair terms were detected."
+        recommendation = "Legal or manager review is recommended before signing."
     else:
         risk_level = "high"
+        verdict = "Red Flag"
+        summary = "Multiple serious contract risks were detected."
+        recommendation = "Do not sign before legal review."
 
     return {
+        "verdict": verdict,
         "risk_level": risk_level,
         "risk_score": score,
         "risk_factors": risk_factors,
+        "summary": summary,
+        "recommendation": recommendation,
     }

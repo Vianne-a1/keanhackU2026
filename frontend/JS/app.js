@@ -178,53 +178,65 @@ function runPolicyCheck() {
     `;
 }
 
-function runContractAudit() {
-    const text = document.getElementById("contractText").value.toLowerCase();
+async function runContractAudit() {
+    const input = document.getElementById("contractText");
     const output = document.getElementById("auditResult");
+    const contractText = input.value.trim();
 
-    const checks = [
-        {
-            label: "Automatic long-term renewal",
-            regex: /(auto[- ]?renew|automatic renewal|5 years|five years)/
-        },
-        {
-            label: "Potential hidden service fee",
-            regex: /(service fee|processing fee|administrative fee|additional fee)/
-        },
-        {
-            label: "Unusual payment/bank account change",
-            regex: /(bank account change|wire to new account|updated payment destination)/
-        },
-        {
-            label: "Ghost service risk",
-            regex: /(advisory retainer|miscellaneous support|undefined service)/
-        }
-    ];
-
-    const findings = checks.filter((item) => item.regex.test(text)).map((item) => item.label);
-
-    let verdict = "Safe";
-    let cssClass = "safe";
-
-    if (findings.length >= 3) {
-        verdict = "Red Flag";
-        cssClass = "red-flag";
-    } else if (findings.length >= 1) {
-        verdict = "Warning";
-        cssClass = "warning";
+    if (!contractText) {
+        output.innerHTML = "<p>Please enter contract text.</p>";
+        return;
     }
 
-    const list = findings.length
-        ? `<ul>${findings.map((item) => `<li>${item}</li>`).join("")}</ul>`
-        : "<p>No major fraud/fairness indicators were detected in this sample.</p>";
+    output.innerHTML = "<p>Loading...</p>";
 
-    output.innerHTML = `
-        <span class="tag ${cssClass}">${verdict}</span>
-        <strong>${verdict} Audit Result</strong>
-        ${list}
-    `;
+    try {
+        const res = await fetch("http://localhost:8000/api/contracts/audit-text", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                contract_text: contractText,
+            }),
+        });
+
+        const data = await res.json();
+        console.log("Backend result:", data);
+
+        if (!res.ok) {
+            throw new Error(data.detail || "Backend error");
+        }
+
+        const cssClass =
+            data.risk_level === "high"
+                ? "red-flag"
+                : data.risk_level === "medium"
+                ? "warning"
+                : "safe";
+
+        output.innerHTML = `
+            <span class="tag ${cssClass}">${data.verdict}</span>
+            <strong>${data.verdict} Audit Result</strong>
+            <p><strong>Risk Level:</strong> ${data.risk_level}</p>
+            <p><strong>Risk Score:</strong> ${data.risk_score}</p>
+            <p>${data.summary}</p>
+            <ul>
+                ${(data.risk_factors || []).map(item => `
+                    <li>
+                        <strong>${item.title}</strong><br>
+                        ${item.explanation}<br>
+                        <small>Matched: ${(item.matched_terms || []).join(", ")}</small>
+                    </li>
+                `).join("")}
+            </ul>
+            <p><strong>Recommendation:</strong> ${data.recommendation}</p>
+        `;
+    } catch (err) {
+        console.error(err);
+        output.innerHTML = "<p style='color:red'>Backend connection failed. Check terminal and console.</p>";
+    }
 }
-
 function evaluatePolicyQuestion(question, orgScope) {
     const normalized = question.toLowerCase();
     const facts = [];

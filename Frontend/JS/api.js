@@ -116,3 +116,24 @@ async function apiDeletePolicy(docId) {
     if (!res.ok) throw new Error(data.detail || "Delete failed");
     return data;
 }
+
+async function apiDownloadPolicy(docId, filename) {
+    const res = await fetch(`${API_BASE}/policies/${docId}/download`, {
+        method: "GET",
+        headers: authHeaders(),
+    });
+    if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error("Download failed: " + errorText);
+    }
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.style.display = "none";
+    a.href = url;
+    a.download = filename || "document.pdf";
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+}

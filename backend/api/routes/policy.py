@@ -45,6 +45,7 @@ async def upload_policy(
         "filename": file.filename,
         "uploaded_by": user["sub"],
         "uploaded_at": datetime.now(timezone.utc),
+        "file_data": file_bytes,
     }).inserted_id)
 
     chunks = chunk_text(text)
@@ -82,3 +83,22 @@ def delete_policy(doc_id: str, user: dict = Depends(require_upload_permission)):
     mongo.policy_documents().delete_one({"_id": ObjectId(doc_id)})
     mongo.policy_chunks().delete_many({"doc_id": doc_id})
     return {"message": "Document deleted"}
+
+
+from fastapi.responses import Response
+
+@router.get("/policies/{doc_id}/download")
+def download_policy(doc_id: str, user: dict = Depends(get_current_user)):
+    doc = mongo.policy_documents().find_one({"_id": ObjectId(doc_id), "company_id": user["company_id"]})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+    
+    file_bytes = doc.get("file_data")
+    if not file_bytes:
+        raise HTTPException(status_code=404, detail="Raw file data not found for this document")
+
+    filename = doc.get("filename", "document.pdf")
+    return Response(
+        content=file_bytes,
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+    )

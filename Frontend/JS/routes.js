@@ -590,7 +590,10 @@ function initCompanyPage() {
 					<span class="tag approved">Policy</span>
 					<h3>${doc.title || doc.filename}</h3>
 					<p>${doc.filename}</p>
-					${isAdmin ? `<button class="btn btn-secondary" type="button" data-delete-doc="${doc._id}" style="margin-top:8px;">Delete</button>` : ""}
+                    <div style="margin-top:8px; display: flex; gap: 8px;">
+					    <button class="btn btn-primary" type="button" data-download-doc="${doc._id}" data-doc-name="${doc.filename}">Download</button>
+					    ${isAdmin ? `<button class="btn btn-secondary" type="button" data-delete-doc="${doc._id}">Delete</button>` : ""}
+                    </div>
 				</article>
 			`).join("");
 		} catch (err) {
@@ -670,6 +673,7 @@ function initCompanyPage() {
 			<article class="play-card">
 				<span class="tag ${log.verdict === "Approved" ? "approved" : log.verdict === "Prohibited" ? "prohibited" : "warning"}">${log.verdict}</span>
 				<h3>${log.question}</h3>
+                <p><strong>Asked by:</strong> ${log.userEmail || "Unknown"}</p>
 				<p><strong>Response:</strong> ${log.response}</p>
 				<p><strong>Time:</strong> ${new Date(log.createdAt).toLocaleString()}</p>
 			</article>
@@ -689,11 +693,32 @@ function initCompanyPage() {
 		const approveButton = event.target.closest("[data-approve-request]");
 		const denyButton = event.target.closest("[data-deny-request]");
 		const deleteDocButton = event.target.closest("[data-delete-doc]");
+		const downloadDocButton = event.target.closest("[data-download-doc]");
 
 		if (approveButton) {
 			approveRequestById(approveButton.getAttribute("data-approve-request"));
 			renderRequests();
 			renderHistory();
+		}
+		if (denyButton) {
+			denyRequestById(denyButton.getAttribute("data-deny-request"));
+			renderRequests();
+			renderHistory();
+		}
+		if (downloadDocButton) {
+			const docId = downloadDocButton.getAttribute("data-download-doc");
+			const docName = downloadDocButton.getAttribute("data-doc-name");
+			const originalText = downloadDocButton.textContent;
+			downloadDocButton.disabled = true;
+			downloadDocButton.textContent = "Downloading…";
+			try {
+				await apiDownloadPolicy(docId, docName);
+			} catch (err) {
+				alert(`Download failed: ${err.message}`);
+			} finally {
+				downloadDocButton.disabled = false;
+				downloadDocButton.textContent = originalText;
+			}
 		}
 		if (denyButton) {
 			denyRequestById(denyButton.getAttribute("data-deny-request"));

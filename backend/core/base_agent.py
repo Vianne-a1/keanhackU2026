@@ -1,4 +1,3 @@
-import re
 import httpx
 from abc import ABC, abstractmethod
 from core.config import GEMINI_API_KEY, LLM_MODEL
@@ -20,6 +19,7 @@ class BaseAgent(ABC):
                 json={
                     "system_instruction": {"parts": [{"text": system}]},
                     "contents": [{"role": "user", "parts": [{"text": user}]}],
+                    "generationConfig": {"responseMimeType": "application/json"},
                 },
             )
 
@@ -27,16 +27,11 @@ class BaseAgent(ABC):
         if "error" in data:
             raise RuntimeError(f"[{self.name}] LLM error: {data['error']['message']}")
 
-        content = data["candidates"][0]["content"]["parts"][0]["text"].strip()
+        candidates = data.get("candidates", [])
+        if not candidates or "content" not in candidates[0]:
+            raise RuntimeError(f"[{self.name}] Gemini returned no content. Full response: {data}")
 
-        if "```" in content:
-            match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", content, re.DOTALL)
-            if match:
-                return match.group(1)
-
-        match = re.search(r"\{.*\}", content, re.DOTALL)
-        if match:
-            return match.group(0)
+        content = candidates[0]["content"]["parts"][0]["text"].strip()
 
         return content
 

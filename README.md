@@ -98,7 +98,7 @@ Create `backend/.env` based on `backend/.env.example`:
 
 ```env
 GEMINI_API_KEY=your_gemini_api_key_here
-LLM_MODEL=gemini-2.0-flash
+LLM_MODEL=your_gemini_model_here
 MONGO_URI=mongodb+srv://<user>:<pass>@cluster.mongodb.net/policyguard
 JWT_SECRET=your-random-secret-string
 ```

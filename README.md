@@ -106,7 +106,7 @@ JWT_SECRET=your-random-secret-string
 | Variable | Description |
 |----------|-------------|
 | `GEMINI_API_KEY` | API key from [Google AI Studio](https://aistudio.google.com/app/apikey) |
-| `LLM_MODEL` | Gemini model ID. Defaults to `gemini-2.0-flash`. |
+| `LLM_MODEL` | Any Gemini model ID (e.g. `gemini-2.0-flash`, `gemini-1.5-pro`). Replace with your preferred model. |
 | `MONGO_URI` | [MongoDB](https://www.mongodb.com/) connection string | 
 | `JWT_SECRET` | Secret for signing JWT tokens — use a long random string in production |
 

@@ -65,7 +65,7 @@ Contract analysis runs a single `ContractAnalysisAgent` that looks for fraud sig
 - Python 3.11+
 - Node.js 18+
 - MongoDB Atlas cluster (or local MongoDB)
-- [OpenRouter](https://openrouter.ai) API key
+- [Google AI Studio](https://aistudio.google.com/app/apikey) Gemini API key
 
 ### Backend
 
@@ -97,16 +97,16 @@ The app runs at `http://localhost:3000`.
 Create `backend/.env` based on `backend/.env.example`:
 
 ```env
-OPENROUTER_API_KEY=your_key_here
-LLM_MODEL=nvidia/nemotron-3-super-120b-a12b:free
+GEMINI_API_KEY=your_gemini_api_key_here
+LLM_MODEL=gemini-2.0-flash
 MONGO_URI=mongodb+srv://<user>:<pass>@cluster.mongodb.net/policyguard
 JWT_SECRET=your-random-secret-string
 ```
 
 | Variable | Description |
 |----------|-------------|
-| `OPENROUTER_API_KEY` | API key from [openrouter.ai](https://openrouter.ai) |
-| `LLM_MODEL` | Any OpenRouter model ID. Defaults to a free Nemotron model. |
+| `GEMINI_API_KEY` | API key from [Google AI Studio](https://aistudio.google.com/app/apikey) |
+| `LLM_MODEL` | Gemini model ID. Defaults to `gemini-2.0-flash`. |
 | `MONGO_URI` | [MongoDB](https://www.mongodb.com/) connection string | 
 | `JWT_SECRET` | Secret for signing JWT tokens — use a long random string in production |
 
